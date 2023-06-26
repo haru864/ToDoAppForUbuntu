@@ -1,7 +1,22 @@
 from tkinter import *
 from tkinter import ttk
+from typing import Final
+
+MAIN_WINDOW_TITLE: Final = "ToDoApp"
+MAIN_WINDOW_SIZE: Final = "500x500"
+USAGE_WINDOW_SIZE: Final = "400x400"
 
 taskList = []
+usageWindow = None
+
+
+def centerWindow(window):
+    window.update_idletasks()
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width // 2) - (window.winfo_width() // 2)
+    y = (screen_height // 2) - (window.winfo_height() // 2)
+    window.geometry(f"+{x}+{y}")
 
 
 def addNewTask():
@@ -13,16 +28,16 @@ def addNewTask():
 
 def _on_mousewheel(event):
     # canvasの現在のスクロール範囲を取得
-    scrollregion = taskListCanvas.cget("scrollregion")
+    scrollRegion = taskListCanvas.cget("scrollregion")
 
-    if scrollregion == "":
+    if scrollRegion == "":
         return
 
-    scrollregion = [int(val) for val in scrollregion.split()]
+    scrollRegionList = [int(val) for val in scrollRegion.split()]
     visible_height = taskListCanvas.winfo_height()  # taskListCanvasの可視領域の高さ
 
     # スクロール可能範囲とtaskListCanvasの可視領域の高さを比較
-    if (scrollregion[3] - scrollregion[1]) > visible_height:
+    if (scrollRegionList[3] - scrollRegionList[1]) > visible_height:
         # スクロールバーを操作
         if event.num == 4:
             taskListCanvas.yview_scroll(-1, "units")
@@ -30,10 +45,22 @@ def _on_mousewheel(event):
             taskListCanvas.yview_scroll(1, "units")
 
 
+def displayUsage():
+    global usageWindow
+    if usageWindow is None or not Toplevel.winfo_exists(usageWindow):
+        usageWindow = Toplevel()
+        usageWindow.title("usage")
+        Label(usageWindow, text="hello, world!").pack()
+    usageWindow.geometry(USAGE_WINDOW_SIZE)
+    centerWindow(usageWindow)
+    usageWindow.lift()
+
+
 # ウィンドウを生成
 root = Tk()
-root.title("ToDoApp")
-root.geometry("500x500")
+root.title(MAIN_WINDOW_TITLE)
+root.geometry(MAIN_WINDOW_SIZE)
+centerWindow(root)
 
 taskListFrame = Frame(root, width=300, height=300, borderwidth=2, relief="solid")
 menuFrame = Frame(root, width=100, height=300, borderwidth=2, relief="solid")
@@ -63,10 +90,10 @@ taskListCanvas.bind("<Button-5>", _on_mousewheel)
 
 # メニューにボタンを設置
 addTaskButton = Button(menuFrame, text="add task", command=addNewTask)
-helpButton = Button(menuFrame, text="help")
+usageButton = Button(menuFrame, text="usage", command=displayUsage)
 closeButton = Button(menuFrame, text="close", command=root.destroy)
 addTaskButton.pack(side=TOP, pady=10)
-helpButton.pack(side=TOP, pady=10)
+usageButton.pack(side=TOP, pady=10)
 closeButton.pack(side=TOP, pady=10)
 
 # ウィンドウの表示
