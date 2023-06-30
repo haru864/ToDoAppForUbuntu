@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import filedialog
 from typing import Final
+import pygame
 
 MAIN_WINDOW_TITLE: Final[str] = "ToDoApp"
 MAIN_WINDOW_WIDTH: Final[str] = "500"
@@ -16,7 +18,7 @@ taskList = []
 usageWindow = None
 lastPushedTaskMenuButton: Menubutton = None
 prev_geometry = None
-SOUND_FILE: str = "/usr/share/sounds/gnome/default/alerts/bark.ogg"
+SOUND_FILE: str = "../sound/bark.ogg"
 
 
 def centerWindow(window) -> None:
@@ -102,8 +104,18 @@ def displayUsage() -> None:
     usageWindow.lift()
 
 
-def setSoundFile() -> None:
-    pass
+def selectSound() -> None:
+    global SOUND_FILE
+    SOUND_FILE = filedialog.askopenfilename(
+        filetypes=[("OGG files", "*.ogg")], initialdir="../sound"
+    )
+
+
+def listenSound() -> None:
+    global SOUND_FILE
+    pygame.init()
+    pygame.mixer.music.load(SOUND_FILE)
+    pygame.mixer.music.play()
 
 
 # ウィンドウを生成
@@ -148,11 +160,13 @@ taskListCanvas.bind("<Button-5>", _on_mousewheel)
 # メニューにボタンを設置
 addTaskButton = Button(menuFrame, text="add task", command=addNewTask)
 usageButton = Button(menuFrame, text="usage", command=displayUsage)
-soundButton = Button(menuFrame, text="sound", command=setSoundFile)
+setSoundButton = Button(menuFrame, text="set sound", command=selectSound)
+listenSoundButton = Button(menuFrame, text="listen sound", command=listenSound)
 closeButton = Button(menuFrame, text="close", command=root.destroy)
 addTaskButton.pack(side=TOP, pady=10)
 usageButton.pack(side=TOP, pady=10)
-soundButton.pack(side=TOP, pady=10)
+setSoundButton.pack(side=TOP, pady=10)
+listenSoundButton.pack(side=TOP, pady=10)
 closeButton.pack(side=TOP, pady=10)
 
 # ウィンドウの表示
