@@ -2,15 +2,24 @@ from tkinter import *
 from tkinter import ttk
 from typing import Final
 
-MAIN_WINDOW_TITLE: Final = "ToDoApp"
-MAIN_WINDOW_SIZE: Final = "500x500"
-USAGE_WINDOW_SIZE: Final = "400x400"
+MAIN_WINDOW_TITLE: Final[str] = "ToDoApp"
+MAIN_WINDOW_WIDTH: Final[str] = "500"
+MAIN_WINDOW_HEIGHT: Final[str] = "500"
+MAIN_WINDOW_SIZE: Final[str] = f"{MAIN_WINDOW_WIDTH}x{MAIN_WINDOW_HEIGHT}"
+USAGE_WINDOW_WIDTH: Final[str] = "400"
+USAGE_WINDOW_HEIGHT: Final[str] = "400"
+USAGE_WINDOW_SIZE: Final[str] = f"{USAGE_WINDOW_WIDTH}x{USAGE_WINDOW_HEIGHT}"
+TASK_LIST_FRAME_WIDTH: Final[int] = 300
+TASK_LIST_FRAME_HEIGHT: Final[int] = 300
 
 taskList = []
 usageWindow = None
+lastPushedTaskMenuButton: Menubutton = None
+prev_geometry = None
+SOUND_FILE: str = "/usr/share/sounds/gnome/default/alerts/bark.ogg"
 
 
-def centerWindow(window):
+def centerWindow(window) -> None:
     window.update_idletasks()
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
@@ -19,14 +28,43 @@ def centerWindow(window):
     window.geometry(f"+{x}+{y}")
 
 
-def addNewTask():
+def addNewTask() -> None:
+    global taskList
     taskNumber = len(taskList) + 1
-    newTaskButton = Button(innerTaskListFrame, text="Task " + str(taskNumber))
-    newTaskButton.pack(fill=X)
-    taskList.append(newTaskButton)
+    taskName = "Task " + str(taskNumber)
+    newTaskFrame = Frame(
+        innerTaskListFrame, width=30, height=10, borderwidth=1, relief="solid"
+    )
+    newTaskLabel = Label(newTaskFrame, text=taskName, width=30)
+    newTaskMenuButton = Menubutton(newTaskFrame, text="setting")
+    newTaskMenuButton.menu = Menu(newTaskMenuButton)
+    newTaskMenuButton.menu.add_command(
+        label="task name", command=lambda: print("task name")
+    )
+    newTaskMenuButton.menu.add_command(
+        label="set time", command=lambda: print("set time")
+    )
+    newTaskMenuButton.menu.add_command(label="start", command=lambda: print("start"))
+    newTaskMenuButton.menu.add_command(label="stop", command=lambda: print("stop"))
+    newTaskMenuButton.menu.add_command(label="delete", command=lambda: print("delete"))
+    newTaskFrame.pack(fill=X)
+    newTaskLabel.pack(side=LEFT)
+    newTaskMenuButton.pack(side=RIGHT)
+    newTaskMenuButton["menu"] = newTaskMenuButton.menu
+    newTaskMenuButton.bind(
+        "<Button-1>",
+        lambda event, menuButton=newTaskMenuButton: menuButtonAction(menuButton),
+    )
+    taskList.append(newTaskFrame)
 
 
-def _on_mousewheel(event):
+def menuButtonAction(menuButton: Menubutton) -> None:
+    global lastPushedTaskMenuButton
+    print("(menuButtonAction) argument menu: " + str(menuButton))
+    lastPushedTaskMenuButton = menuButton
+
+
+def _on_mousewheel(event) -> None:
     # canvasの現在のスクロール範囲を取得
     scrollRegion = taskListCanvas.cget("scrollregion")
 
@@ -45,7 +83,15 @@ def _on_mousewheel(event):
             taskListCanvas.yview_scroll(1, "units")
 
 
-def displayUsage():
+def _on_move(event) -> None:
+    global lastPushedTaskMenuButton
+    print("(_on_move) lastPushedTaskMenuButton: " + str(lastPushedTaskMenuButton))
+    if lastPushedTaskMenuButton is None:
+        return
+    lastPushedTaskMenuButton.menu.unpost()
+
+
+def displayUsage() -> None:
     global usageWindow
     if usageWindow is None or not Toplevel.winfo_exists(usageWindow):
         usageWindow = Toplevel()
@@ -56,13 +102,24 @@ def displayUsage():
     usageWindow.lift()
 
 
+def setSoundFile() -> None:
+    pass
+
+
 # ウィンドウを生成
 root = Tk()
 root.title(MAIN_WINDOW_TITLE)
 root.geometry(MAIN_WINDOW_SIZE)
+root.bind("<Configure>", _on_move)
 centerWindow(root)
 
-taskListFrame = Frame(root, width=300, height=300, borderwidth=2, relief="solid")
+taskListFrame = Frame(
+    root,
+    width=TASK_LIST_FRAME_WIDTH,
+    height=TASK_LIST_FRAME_HEIGHT,
+    borderwidth=2,
+    relief="solid",
+)
 menuFrame = Frame(root, width=100, height=300, borderwidth=2, relief="solid")
 menuFrame.pack_propagate(False)
 taskListFrame.grid(row=0, column=0)
@@ -91,9 +148,11 @@ taskListCanvas.bind("<Button-5>", _on_mousewheel)
 # メニューにボタンを設置
 addTaskButton = Button(menuFrame, text="add task", command=addNewTask)
 usageButton = Button(menuFrame, text="usage", command=displayUsage)
+soundButton = Button(menuFrame, text="sound", command=setSoundFile)
 closeButton = Button(menuFrame, text="close", command=root.destroy)
 addTaskButton.pack(side=TOP, pady=10)
 usageButton.pack(side=TOP, pady=10)
+soundButton.pack(side=TOP, pady=10)
 closeButton.pack(side=TOP, pady=10)
 
 # ウィンドウの表示
