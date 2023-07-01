@@ -1,8 +1,12 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 from tkinter import filedialog
 from typing import Final
 import pygame
+
+# import Task
+from Task import Task
 
 MAIN_WINDOW_TITLE: Final[str] = "ToDoApp"
 MAIN_WINDOW_WIDTH: Final[str] = "500"
@@ -17,7 +21,6 @@ TASK_LIST_FRAME_HEIGHT: Final[int] = 300
 taskList = []
 usageWindow = None
 lastPushedTaskMenuButton: Menubutton = None
-prev_geometry = None
 SOUND_FILE: str = "../sound/bark.ogg"
 
 
@@ -34,6 +37,15 @@ def addNewTask() -> None:
     global taskList
     taskNumber = len(taskList) + 1
     taskName = "Task " + str(taskNumber)
+
+    newTask = None
+    try:
+        newTask = Task(taskName, 10)
+    except Exception as e:
+        print(f"Exception in generating Task: {e}")
+        messagebox.showinfo("ERROR", e)
+        return
+
     newTaskFrame = Frame(
         innerTaskListFrame, width=30, height=10, borderwidth=1, relief="solid"
     )
@@ -62,7 +74,6 @@ def addNewTask() -> None:
 
 def menuButtonAction(menuButton: Menubutton) -> None:
     global lastPushedTaskMenuButton
-    print("(menuButtonAction) argument menu: " + str(menuButton))
     lastPushedTaskMenuButton = menuButton
 
 
@@ -87,7 +98,6 @@ def _on_mousewheel(event) -> None:
 
 def _on_move(event) -> None:
     global lastPushedTaskMenuButton
-    print("(_on_move) lastPushedTaskMenuButton: " + str(lastPushedTaskMenuButton))
     if lastPushedTaskMenuButton is None:
         return
     lastPushedTaskMenuButton.menu.unpost()
