@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import filedialog
+from tkinter import simpledialog
 from typing import Final
 import pygame
 from Task import Task
@@ -46,7 +47,10 @@ def addTask() -> None:
     taskLabel = Label(taskFrame, text=taskName, width=30)
     taskMenuButton = Menubutton(taskFrame, text="setting")
     taskMenuButton.menu = Menu(taskMenuButton)
-    taskMenuButton.menu.add_command(label="rename")
+    taskMenuButton.menu.add_command(
+        label="rename",
+        command=lambda label=taskLabel: renameTask(label),
+    )
     taskMenuButton.menu.add_command(label="set time")
     taskMenuButton.menu.add_command(label="start")
     taskMenuButton.menu.add_command(label="stop")
@@ -64,13 +68,17 @@ def addTask() -> None:
     )
 
 
+def renameTask(label: Label):
+    newTaskName: str = simpledialog.askstring("New Task Name", "Write New Task Name")
+    label.config(text=newTaskName)
+
+
 def deleteTask(frame: Frame, task: Task) -> None:
     global lastPushedTaskMenuButton
     print(f"delete {frame}, {task}")
     frame.destroy()
     task.delete()
     lastPushedTaskMenuButton = None
-    # del task
 
 
 def menuButtonAction(menuButton: Menubutton) -> None:
