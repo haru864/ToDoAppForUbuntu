@@ -26,6 +26,13 @@ class Task:
                 return newTaskID
         return None
 
+    def getLeftTimeStr(self):
+        seconds: int = self.leftSeconds
+        h: int = seconds // 3600
+        m: int = (seconds - h * 3600) // 60
+        s: int = seconds - h * 3600 - m * 60
+        return f"{h:02}:{m:02}:{s:02}"
+
     def rename(self, newTaskName: str):
         self.taskName = newTaskName
 

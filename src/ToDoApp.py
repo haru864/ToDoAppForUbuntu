@@ -6,20 +6,22 @@ from tkinter import simpledialog
 from typing import Final
 import pygame
 from Task import Task
+from TaskTimeDialog import TaskTimeDialog
 
 MAIN_WINDOW_TITLE: Final[str] = "ToDoApp"
-MAIN_WINDOW_WIDTH: Final[str] = "500"
-MAIN_WINDOW_HEIGHT: Final[str] = "500"
+MAIN_WINDOW_WIDTH: Final[str] = "700"
+MAIN_WINDOW_HEIGHT: Final[str] = "600"
 MAIN_WINDOW_SIZE: Final[str] = f"{MAIN_WINDOW_WIDTH}x{MAIN_WINDOW_HEIGHT}"
 USAGE_WINDOW_WIDTH: Final[str] = "400"
 USAGE_WINDOW_HEIGHT: Final[str] = "400"
 USAGE_WINDOW_SIZE: Final[str] = f"{USAGE_WINDOW_WIDTH}x{USAGE_WINDOW_HEIGHT}"
-TASK_LIST_FRAME_WIDTH: Final[int] = 300
-TASK_LIST_FRAME_HEIGHT: Final[int] = 300
+TASK_LIST_FRAME_WIDTH: Final[int] = 500
+TASK_LIST_FRAME_HEIGHT: Final[int] = 500
 
 usageWindow = None
 lastPushedTaskMenuButton: Menubutton = None
 SOUND_FILE: str = "../sound/bark.ogg"
+task_dict = {}
 
 
 def centerWindow(window) -> None:
@@ -32,26 +34,30 @@ def centerWindow(window) -> None:
 
 
 def addTask() -> None:
-    taskName = "New Task"
+    taskName = "New Task " + str(len(task_dict) + 1)
     newTask = None
     try:
-        newTask = Task(taskName, 10)
+        newTask = Task(taskName, 0)
     except Exception as e:
         print(f"Exception in generating Task: {e}")
         messagebox.showinfo("ERROR", e)
         return
 
     taskFrame = Frame(
-        innerTaskListFrame, width=30, height=10, borderwidth=1, relief="solid"
+        innerTaskListFrame, width=70, height=10, borderwidth=0.5, relief="solid"
     )
-    taskLabel = Label(taskFrame, text=taskName, width=30)
+    taskLabel = Label(taskFrame, text=taskName, width=40)
+    timeLabel = Label(taskFrame, text=newTask.getLeftTimeStr())
     taskMenuButton = Menubutton(taskFrame, text="setting")
     taskMenuButton.menu = Menu(taskMenuButton)
     taskMenuButton.menu.add_command(
         label="rename",
         command=lambda label=taskLabel: renameTask(label),
     )
-    taskMenuButton.menu.add_command(label="set time")
+    taskMenuButton.menu.add_command(
+        label="set time",
+        command=lambda label=timeLabel, task=newTask: setTime(label, task),
+    )
     taskMenuButton.menu.add_command(label="start")
     taskMenuButton.menu.add_command(label="stop")
     taskMenuButton.menu.add_command(
@@ -60,24 +66,37 @@ def addTask() -> None:
     )
     taskFrame.pack(fill=X)
     taskLabel.pack(side=LEFT)
+    timeLabel.pack(side=LEFT)
     taskMenuButton.pack(side=RIGHT)
     taskMenuButton["menu"] = taskMenuButton.menu
     taskMenuButton.bind(
         "<Button-1>",
         lambda event, menuButton=taskMenuButton: menuButtonAction(menuButton),
     )
+    task_dict[newTask.taskName] = newTask
+
+
+def setTime(label: Label, task: Task):
+    dialog = TaskTimeDialog(label)
+    task.leftSeconds = dialog.result
+    label.config(text=task.getLeftTimeStr())
 
 
 def renameTask(label: Label):
+    currentTaskName: str = label.cget("text")
     newTaskName: str = simpledialog.askstring("New Task Name", "Write New Task Name")
+    currentTask: Task = task_dict[currentTaskName]
+    currentTask.rename(newTaskName)
+    del task_dict[currentTaskName]
+    task_dict[newTaskName] = currentTask
     label.config(text=newTaskName)
 
 
 def deleteTask(frame: Frame, task: Task) -> None:
     global lastPushedTaskMenuButton
-    print(f"delete {frame}, {task}")
     frame.destroy()
     task.delete()
+    del task_dict[task.taskName]
     lastPushedTaskMenuButton = None
 
 
@@ -87,18 +106,12 @@ def menuButtonAction(menuButton: Menubutton) -> None:
 
 
 def _on_mousewheel(event) -> None:
-    # canvasの現在のスクロール範囲を取得
     scrollRegion = taskListCanvas.cget("scrollregion")
-
     if scrollRegion == "":
         return
-
     scrollRegionList = [int(val) for val in scrollRegion.split()]
-    visible_height = taskListCanvas.winfo_height()  # taskListCanvasの可視領域の高さ
-
-    # スクロール可能範囲とtaskListCanvasの可視領域の高さを比較
+    visible_height = taskListCanvas.winfo_height()
     if (scrollRegionList[3] - scrollRegionList[1]) > visible_height:
-        # スクロールバーを操作
         if event.num == 4:
             taskListCanvas.yview_scroll(-1, "units")
         elif event.num == 5:
@@ -156,9 +169,15 @@ menuFrame.pack_propagate(False)
 taskListFrame.grid(row=0, column=0)
 menuFrame.grid(row=0, column=1)
 
-taskListCanvas = Canvas(taskListFrame)
+taskListCanvas = Canvas(
+    taskListFrame,
+    width=TASK_LIST_FRAME_WIDTH,
+    height=TASK_LIST_FRAME_HEIGHT,
+)
 taskListScrollbar = Scrollbar(
-    taskListFrame, orient="vertical", command=taskListCanvas.yview
+    taskListFrame,
+    orient="vertical",
+    command=taskListCanvas.yview,
 )
 innerTaskListFrame = Frame(taskListCanvas, borderwidth=2, relief="solid")
 
