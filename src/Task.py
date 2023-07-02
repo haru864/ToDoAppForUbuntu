@@ -2,7 +2,7 @@ from typing import Final
 
 
 class Task:
-    MAX_NUM_OF_TASKS: Final[int] = 10
+    MAX_NUM_OF_TASKS: Final[int] = 3
     NUM_OF_USED_TASK_ID: int = 0
     TASK_ID_POOL: bool = [False for i in range(MAX_NUM_OF_TASKS)]
 
@@ -32,3 +32,6 @@ class Task:
     def delete(self):
         Task.NUM_OF_USED_TASK_ID -= 1
         Task.TASK_ID_POOL[self.taskId] = False
+
+    def __str__(self) -> str:
+        return f"{self.taskId}, {self.taskName}, {self.leftSeconds}"

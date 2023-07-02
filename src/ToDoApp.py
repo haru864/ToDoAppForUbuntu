@@ -4,8 +4,6 @@ from tkinter import messagebox
 from tkinter import filedialog
 from typing import Final
 import pygame
-
-# import Task
 from Task import Task
 
 MAIN_WINDOW_TITLE: Final[str] = "ToDoApp"
@@ -18,7 +16,6 @@ USAGE_WINDOW_SIZE: Final[str] = f"{USAGE_WINDOW_WIDTH}x{USAGE_WINDOW_HEIGHT}"
 TASK_LIST_FRAME_WIDTH: Final[int] = 300
 TASK_LIST_FRAME_HEIGHT: Final[int] = 300
 
-taskList = []
 usageWindow = None
 lastPushedTaskMenuButton: Menubutton = None
 SOUND_FILE: str = "../sound/bark.ogg"
@@ -33,11 +30,8 @@ def centerWindow(window) -> None:
     window.geometry(f"+{x}+{y}")
 
 
-def addNewTask() -> None:
-    global taskList
-    taskNumber = len(taskList) + 1
-    taskName = "Task " + str(taskNumber)
-
+def addTask() -> None:
+    taskName = "New Task"
     newTask = None
     try:
         newTask = Task(taskName, 10)
@@ -46,30 +40,37 @@ def addNewTask() -> None:
         messagebox.showinfo("ERROR", e)
         return
 
-    newTaskFrame = Frame(
+    taskFrame = Frame(
         innerTaskListFrame, width=30, height=10, borderwidth=1, relief="solid"
     )
-    newTaskLabel = Label(newTaskFrame, text=taskName, width=30)
-    newTaskMenuButton = Menubutton(newTaskFrame, text="setting")
-    newTaskMenuButton.menu = Menu(newTaskMenuButton)
-    newTaskMenuButton.menu.add_command(
-        label="task name", command=lambda: print("task name")
+    taskLabel = Label(taskFrame, text=taskName, width=30)
+    taskMenuButton = Menubutton(taskFrame, text="setting")
+    taskMenuButton.menu = Menu(taskMenuButton)
+    taskMenuButton.menu.add_command(label="rename")
+    taskMenuButton.menu.add_command(label="set time")
+    taskMenuButton.menu.add_command(label="start")
+    taskMenuButton.menu.add_command(label="stop")
+    taskMenuButton.menu.add_command(
+        label="delete",
+        command=lambda frame=taskFrame, task=newTask: deleteTask(frame, task),
     )
-    newTaskMenuButton.menu.add_command(
-        label="set time", command=lambda: print("set time")
-    )
-    newTaskMenuButton.menu.add_command(label="start", command=lambda: print("start"))
-    newTaskMenuButton.menu.add_command(label="stop", command=lambda: print("stop"))
-    newTaskMenuButton.menu.add_command(label="delete", command=lambda: print("delete"))
-    newTaskFrame.pack(fill=X)
-    newTaskLabel.pack(side=LEFT)
-    newTaskMenuButton.pack(side=RIGHT)
-    newTaskMenuButton["menu"] = newTaskMenuButton.menu
-    newTaskMenuButton.bind(
+    taskFrame.pack(fill=X)
+    taskLabel.pack(side=LEFT)
+    taskMenuButton.pack(side=RIGHT)
+    taskMenuButton["menu"] = taskMenuButton.menu
+    taskMenuButton.bind(
         "<Button-1>",
-        lambda event, menuButton=newTaskMenuButton: menuButtonAction(menuButton),
+        lambda event, menuButton=taskMenuButton: menuButtonAction(menuButton),
     )
-    taskList.append(newTaskFrame)
+
+
+def deleteTask(frame: Frame, task: Task) -> None:
+    global lastPushedTaskMenuButton
+    print(f"delete {frame}, {task}")
+    frame.destroy()
+    task.delete()
+    lastPushedTaskMenuButton = None
+    # del task
 
 
 def menuButtonAction(menuButton: Menubutton) -> None:
@@ -168,7 +169,7 @@ taskListCanvas.bind("<Button-4>", _on_mousewheel)
 taskListCanvas.bind("<Button-5>", _on_mousewheel)
 
 # メニューにボタンを設置
-addTaskButton = Button(menuFrame, text="add task", command=addNewTask)
+addTaskButton = Button(menuFrame, text="add task", command=addTask)
 usageButton = Button(menuFrame, text="usage", command=displayUsage)
 setSoundButton = Button(menuFrame, text="set sound", command=selectSound)
 listenSoundButton = Button(menuFrame, text="listen sound", command=listenSound)
