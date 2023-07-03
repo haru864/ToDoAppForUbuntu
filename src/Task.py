@@ -1,4 +1,6 @@
-from typing import Final
+from tkinter import *
+from tkinter import ttk
+from typing import Any, Final
 
 
 class Task:
@@ -6,13 +8,15 @@ class Task:
     NUM_OF_USED_TASK_ID: int = 0
     TASK_ID_POOL: bool = [False for i in range(MAX_NUM_OF_TASKS)]
 
-    def __init__(self, taskName: str, leftSeconds: int) -> None:
+    def __init__(self, master: Frame, taskName: str, leftSeconds: int) -> None:
+        self.master = master
         self.taskId: int = self.getTaskID()
         print(f"taskId: {self.taskId}")
         if self.taskId is None:
             raise Exception("Cannot register any more tasks")
         self.taskName: str = taskName
         self.leftSeconds: int = leftSeconds
+        self.timerRunning = False
 
     def getTaskID(self) -> int:
         if Task.NUM_OF_USED_TASK_ID >= Task.MAX_NUM_OF_TASKS:
@@ -39,6 +43,12 @@ class Task:
     def delete(self):
         Task.NUM_OF_USED_TASK_ID -= 1
         Task.TASK_ID_POOL[self.taskId] = False
+
+    def start(self):
+        self.timerRunning = True
+
+    def stop(self):
+        self.timerRunning = False
 
     def __str__(self) -> str:
         return f"{self.taskId}, {self.taskName}, {self.leftSeconds}"

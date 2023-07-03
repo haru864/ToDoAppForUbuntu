@@ -9,19 +9,19 @@ from Task import Task
 from TaskTimeDialog import TaskTimeDialog
 
 MAIN_WINDOW_TITLE: Final[str] = "ToDoApp"
-MAIN_WINDOW_WIDTH: Final[str] = "700"
+MAIN_WINDOW_WIDTH: Final[str] = "800"
 MAIN_WINDOW_HEIGHT: Final[str] = "600"
 MAIN_WINDOW_SIZE: Final[str] = f"{MAIN_WINDOW_WIDTH}x{MAIN_WINDOW_HEIGHT}"
 USAGE_WINDOW_WIDTH: Final[str] = "400"
 USAGE_WINDOW_HEIGHT: Final[str] = "400"
 USAGE_WINDOW_SIZE: Final[str] = f"{USAGE_WINDOW_WIDTH}x{USAGE_WINDOW_HEIGHT}"
-TASK_LIST_FRAME_WIDTH: Final[int] = 500
+TASK_LIST_FRAME_WIDTH: Final[int] = 650
 TASK_LIST_FRAME_HEIGHT: Final[int] = 500
 
 usageWindow = None
 lastPushedTaskMenuButton: Menubutton = None
 SOUND_FILE: str = "../sound/bark.ogg"
-task_dict = {}
+taskname_to_task_dict = {}
 
 
 def centerWindow(window) -> None:
@@ -34,21 +34,20 @@ def centerWindow(window) -> None:
 
 
 def addTask() -> None:
-    taskName = "New Task " + str(len(task_dict) + 1)
+    taskFrame = Frame(
+        innerTaskListFrame, width=70, height=10, borderwidth=0.5, relief="solid"
+    )
+    taskName = "New Task " + str(len(taskname_to_task_dict) + 1)
     newTask = None
     try:
-        newTask = Task(taskName, 0)
+        newTask = Task(taskFrame, taskName, 10)
     except Exception as e:
         print(f"Exception in generating Task: {e}")
         messagebox.showinfo("ERROR", e)
         return
-
-    taskFrame = Frame(
-        innerTaskListFrame, width=70, height=10, borderwidth=0.5, relief="solid"
-    )
-    taskLabel = Label(taskFrame, text=taskName, width=40)
+    taskLabel = Label(taskFrame, text=taskName, width=45)
     timeLabel = Label(taskFrame, text=newTask.getLeftTimeStr())
-    taskMenuButton = Menubutton(taskFrame, text="setting")
+    taskMenuButton = Menubutton(taskFrame, text="SETTING", relief="groove")
     taskMenuButton.menu = Menu(taskMenuButton)
     taskMenuButton.menu.add_command(
         label="rename",
@@ -58,22 +57,51 @@ def addTask() -> None:
         label="set time",
         command=lambda label=timeLabel, task=newTask: setTime(label, task),
     )
-    taskMenuButton.menu.add_command(label="start")
-    taskMenuButton.menu.add_command(label="stop")
     taskMenuButton.menu.add_command(
         label="delete",
         command=lambda frame=taskFrame, task=newTask: deleteTask(frame, task),
     )
+    startButton = Button(
+        taskFrame,
+        text="START",
+        command=lambda label=timeLabel, task=newTask: startTask(label, task),
+    )
+    stopButton = Button(
+        taskFrame,
+        text="STOP",
+        command=lambda frame=timeLabel, task=newTask: stopTask(frame, task),
+    )
+
     taskFrame.pack(fill=X)
     taskLabel.pack(side=LEFT)
     timeLabel.pack(side=LEFT)
-    taskMenuButton.pack(side=RIGHT)
+    taskMenuButton.pack(side=LEFT)
+    startButton.pack(side=LEFT)
+    stopButton.pack(side=LEFT)
     taskMenuButton["menu"] = taskMenuButton.menu
     taskMenuButton.bind(
         "<Button-1>",
         lambda event, menuButton=taskMenuButton: menuButtonAction(menuButton),
     )
-    task_dict[newTask.taskName] = newTask
+
+    taskname_to_task_dict[newTask.taskName] = newTask
+
+
+def startTask(label: Label, task: Task):
+    task.timerRunning = True
+    decrementTime(label, task)
+
+
+def stopTask(label: Label, task: Task):
+    task.timerRunning = False
+
+
+def decrementTime(label: Label, task: Task):
+    print("decrementTime called")
+    if task.timerRunning and task.leftSeconds > 0:
+        task.leftSeconds -= 1
+        label.config(text=task.getLeftTimeStr())
+        label.after(1000, decrementTime(label, task))
 
 
 def setTime(label: Label, task: Task):
@@ -83,12 +111,16 @@ def setTime(label: Label, task: Task):
 
 
 def renameTask(label: Label):
+    global taskname_to_task_dict
     currentTaskName: str = label.cget("text")
     newTaskName: str = simpledialog.askstring("New Task Name", "Write New Task Name")
-    currentTask: Task = task_dict[currentTaskName]
+    if taskname_to_task_dict.get(newTaskName) is not None:
+        messagebox.showerror("ERROR", "This Task Name is already used")
+        return
+    currentTask: Task = taskname_to_task_dict[currentTaskName]
     currentTask.rename(newTaskName)
-    del task_dict[currentTaskName]
-    task_dict[newTaskName] = currentTask
+    del taskname_to_task_dict[currentTaskName]
+    taskname_to_task_dict[newTaskName] = currentTask
     label.config(text=newTaskName)
 
 
@@ -96,7 +128,7 @@ def deleteTask(frame: Frame, task: Task) -> None:
     global lastPushedTaskMenuButton
     frame.destroy()
     task.delete()
-    del task_dict[task.taskName]
+    del taskname_to_task_dict[task.taskName]
     lastPushedTaskMenuButton = None
 
 
