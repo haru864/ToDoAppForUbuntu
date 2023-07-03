@@ -8,15 +8,17 @@ class Task:
     NUM_OF_USED_TASK_ID: int = 0
     TASK_ID_POOL: bool = [False for i in range(MAX_NUM_OF_TASKS)]
 
-    def __init__(self, master: Frame, taskName: str, leftSeconds: int) -> None:
-        self.master = master
+    def __init__(self, taskName: str, leftSeconds: int) -> None:
         self.taskId: int = self.getTaskID()
-        print(f"taskId: {self.taskId}")
         if self.taskId is None:
             raise Exception("Cannot register any more tasks")
         self.taskName: str = taskName
         self.leftSeconds: int = leftSeconds
         self.timerRunning = False
+
+    def registerLabel(self, taskNameLabel: Label, leftSecondsLabel: Label):
+        self.taskNameLabel: Label = taskNameLabel
+        self.leftSecondsLabel: Label = leftSecondsLabel
 
     def getTaskID(self) -> int:
         if Task.NUM_OF_USED_TASK_ID >= Task.MAX_NUM_OF_TASKS:
@@ -26,7 +28,6 @@ class Task:
             if Task.TASK_ID_POOL[newTaskID] == False:
                 Task.TASK_ID_POOL[newTaskID] = True
                 Task.NUM_OF_USED_TASK_ID += 1
-                print(f"newTaskID: {newTaskID}")
                 return newTaskID
         return None
 
@@ -44,11 +45,24 @@ class Task:
         Task.NUM_OF_USED_TASK_ID -= 1
         Task.TASK_ID_POOL[self.taskId] = False
 
-    def start(self):
+    def startTask(self):
         self.timerRunning = True
+        self.decrementTime()
 
-    def stop(self):
+    def stopTask(self):
         self.timerRunning = False
+
+    def beep(self):
+        pass
+
+    def decrementTime(self):
+        if self.timerRunning and self.leftSeconds > 0:
+            self.leftSeconds -= 1
+            self.leftSecondsLabel.config(text=self.getLeftTimeStr())
+            self.leftSecondsLabel.after(1000, self.decrementTime)
+        elif self.timerRunning and self.leftSeconds == 0:
+            self.timerRunning = False
+            self.beep()
 
     def __str__(self) -> str:
         return f"{self.taskId}, {self.taskName}, {self.leftSeconds}"

@@ -34,19 +34,23 @@ def centerWindow(window) -> None:
 
 
 def addTask() -> None:
-    taskFrame = Frame(
-        innerTaskListFrame, width=70, height=10, borderwidth=0.5, relief="solid"
-    )
     taskName = "New Task " + str(len(taskname_to_task_dict) + 1)
     newTask = None
     try:
-        newTask = Task(taskFrame, taskName, 10)
+        newTask = Task(taskName, 10)
     except Exception as e:
         print(f"Exception in generating Task: {e}")
         messagebox.showinfo("ERROR", e)
         return
+
+    taskFrame = Frame(
+        innerTaskListFrame, width=70, height=10, borderwidth=0.5, relief="solid"
+    )
     taskLabel = Label(taskFrame, text=taskName, width=45)
     timeLabel = Label(taskFrame, text=newTask.getLeftTimeStr())
+    newTask.registerLabel(taskLabel, timeLabel)
+    taskname_to_task_dict[newTask.taskName] = newTask
+
     taskMenuButton = Menubutton(taskFrame, text="SETTING", relief="groove")
     taskMenuButton.menu = Menu(taskMenuButton)
     taskMenuButton.menu.add_command(
@@ -62,14 +66,10 @@ def addTask() -> None:
         command=lambda frame=taskFrame, task=newTask: deleteTask(frame, task),
     )
     startButton = Button(
-        taskFrame,
-        text="START",
-        command=lambda label=timeLabel, task=newTask: startTask(label, task),
+        taskFrame, text="START", command=lambda task=newTask: task.startTask()
     )
     stopButton = Button(
-        taskFrame,
-        text="STOP",
-        command=lambda frame=timeLabel, task=newTask: stopTask(frame, task),
+        taskFrame, text="STOP", command=lambda task=newTask: task.stopTask()
     )
 
     taskFrame.pack(fill=X)
@@ -83,25 +83,6 @@ def addTask() -> None:
         "<Button-1>",
         lambda event, menuButton=taskMenuButton: menuButtonAction(menuButton),
     )
-
-    taskname_to_task_dict[newTask.taskName] = newTask
-
-
-def startTask(label: Label, task: Task):
-    task.timerRunning = True
-    decrementTime(label, task)
-
-
-def stopTask(label: Label, task: Task):
-    task.timerRunning = False
-
-
-def decrementTime(label: Label, task: Task):
-    print("decrementTime called")
-    if task.timerRunning and task.leftSeconds > 0:
-        task.leftSeconds -= 1
-        label.config(text=task.getLeftTimeStr())
-        label.after(1000, decrementTime(label, task))
 
 
 def setTime(label: Label, task: Task):
