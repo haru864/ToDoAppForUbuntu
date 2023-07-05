@@ -17,10 +17,10 @@ USAGE_WINDOW_HEIGHT: Final[str] = "400"
 USAGE_WINDOW_SIZE: Final[str] = f"{USAGE_WINDOW_WIDTH}x{USAGE_WINDOW_HEIGHT}"
 TASK_LIST_FRAME_WIDTH: Final[int] = 650
 TASK_LIST_FRAME_HEIGHT: Final[int] = 500
+DEFAULT_TASK_TIME: Final[int] = 3
 
 usageWindow = None
 lastPushedTaskMenuButton: Menubutton = None
-SOUND_FILE: str = "../sound/bark.ogg"
 taskname_to_task_dict = {}
 
 
@@ -37,7 +37,7 @@ def addTask() -> None:
     taskName = "New Task " + str(len(taskname_to_task_dict) + 1)
     newTask = None
     try:
-        newTask = Task(taskName, 10)
+        newTask = Task(taskName, DEFAULT_TASK_TIME)
     except Exception as e:
         print(f"Exception in generating Task: {e}")
         messagebox.showinfo("ERROR", e)
@@ -150,16 +150,14 @@ def displayUsage() -> None:
 
 
 def selectSound() -> None:
-    global SOUND_FILE
-    SOUND_FILE = filedialog.askopenfilename(
+    Task.SOUND_FILE = filedialog.askopenfilename(
         filetypes=[("OGG files", "*.ogg")], initialdir="../sound"
     )
 
 
 def listenSound() -> None:
-    global SOUND_FILE
     pygame.init()
-    pygame.mixer.music.load(SOUND_FILE)
+    pygame.mixer.music.load(Task.SOUND_FILE)
     pygame.mixer.music.play()
 
 
