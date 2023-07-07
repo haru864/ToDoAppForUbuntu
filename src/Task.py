@@ -3,6 +3,7 @@ from typing import Final
 import pygame
 import time
 import threading
+from TaskTimeDialog import TaskTimeDialog
 
 
 class Task:
@@ -11,6 +12,8 @@ class Task:
     TASK_ID_POOL: bool = [False for i in range(MAX_NUM_OF_TASKS)]
     SOUND_FILE: str = "../sound/bark.ogg"
     BEEP_PERIOD_SECONDS: int = 5
+    DEFAULT_TASK_TIME: Final[int] = 3
+    ROOT_WIDGET = None
 
     def __init__(self, taskName: str, leftSeconds: int) -> None:
         self.taskId: int = self.getTaskID()
@@ -43,6 +46,32 @@ class Task:
         s: int = seconds - h * 3600 - m * 60
         return f"{h:02}:{m:02}:{s:02}"
 
+    @classmethod
+    def setRootWidget(cls, root):
+        Task.ROOT_WIDGET = root
+
+    def setLeftSeconds(self):
+        dialog = TaskTimeDialog(
+            windowParent=self.leftSecondsLabel,
+            windowTitle="Task Period Update",
+            initialValueSeconds=Task.DEFAULT_TASK_TIME,
+        )
+        if dialog.result is None:
+            return
+        self.leftSeconds = dialog.result
+        self.leftSecondsLabel.config(text=self.getLeftTimeStr())
+
+    @classmethod
+    def setBeepPeriod(cls):
+        dialog = TaskTimeDialog(
+            windowParent=Task.ROOT_WIDGET,
+            windowTitle="Beep Period Update",
+            initialValueSeconds=Task.BEEP_PERIOD_SECONDS,
+        )
+        if dialog.result is None:
+            return
+        Task.BEEP_PERIOD_SECONDS = dialog.result
+
     def rename(self, newTaskName: str):
         self.taskName = newTaskName
 
@@ -73,11 +102,14 @@ class Task:
         start_time = time.time()
         while self.isBeeping:
             elapsed_time = time.time() - start_time
-            if elapsed_time > Task.BEEP_PERIOD_SECONDS:
+            if elapsed_time >= Task.BEEP_PERIOD_SECONDS:
                 pygame.mixer.music.stop()
                 break
             while pygame.mixer.music.get_busy():
-                time.sleep(0.01)
+                if self.isBeeping is False:
+                    pygame.mixer.music.stop()
+                    break
+                time.sleep(0.001)
             pygame.mixer.music.play()
         self.isBeeping = False
 

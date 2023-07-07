@@ -17,7 +17,6 @@ USAGE_WINDOW_HEIGHT: Final[str] = "400"
 USAGE_WINDOW_SIZE: Final[str] = f"{USAGE_WINDOW_WIDTH}x{USAGE_WINDOW_HEIGHT}"
 TASK_LIST_FRAME_WIDTH: Final[int] = 650
 TASK_LIST_FRAME_HEIGHT: Final[int] = 500
-DEFAULT_TASK_TIME: Final[int] = 3
 
 usageWindow = None
 lastPushedTaskMenuButton: Menubutton = None
@@ -37,7 +36,7 @@ def addTask() -> None:
     taskName = "New Task " + str(len(taskname_to_task_dict) + 1)
     newTask = None
     try:
-        newTask = Task(taskName, DEFAULT_TASK_TIME)
+        newTask = Task(taskName, Task.DEFAULT_TASK_TIME)
     except Exception as e:
         print(f"Exception in generating Task: {e}")
         messagebox.showinfo("ERROR", e)
@@ -59,7 +58,7 @@ def addTask() -> None:
     )
     taskMenuButton.menu.add_command(
         label="set time",
-        command=lambda label=timeLabel, task=newTask: setTime(label, task),
+        command=lambda: newTask.setLeftSeconds(),
     )
     taskMenuButton.menu.add_command(
         label="delete",
@@ -85,10 +84,9 @@ def addTask() -> None:
     )
 
 
-def setTime(label: Label, task: Task):
-    dialog = TaskTimeDialog(label)
-    task.leftSeconds = dialog.result
-    label.config(text=task.getLeftTimeStr())
+def setBeepPeriod():
+    Task.setRootWidget(root=root)
+    Task.setBeepPeriod()
 
 
 def renameTask(label: Label):
@@ -164,7 +162,6 @@ def listenSound() -> None:
 # ウィンドウを生成
 root = Tk()
 root.title(MAIN_WINDOW_TITLE)
-root.geometry(MAIN_WINDOW_SIZE)
 root.bind("<Configure>", _on_move)
 centerWindow(root)
 
@@ -176,7 +173,6 @@ taskListFrame = Frame(
     relief="solid",
 )
 menuFrame = Frame(root, width=100, height=300, borderwidth=2, relief="solid")
-menuFrame.pack_propagate(False)
 taskListFrame.grid(row=0, column=0)
 menuFrame.grid(row=0, column=1)
 
@@ -211,12 +207,15 @@ addTaskButton = Button(menuFrame, text="add task", command=addTask)
 usageButton = Button(menuFrame, text="usage", command=displayUsage)
 setSoundButton = Button(menuFrame, text="set sound", command=selectSound)
 listenSoundButton = Button(menuFrame, text="listen sound", command=listenSound)
+setBeepPeriodButton = Button(menuFrame, text="set beep period", command=setBeepPeriod)
 closeButton = Button(menuFrame, text="close", command=root.destroy)
 addTaskButton.pack(side=TOP, pady=10)
 usageButton.pack(side=TOP, pady=10)
 setSoundButton.pack(side=TOP, pady=10)
 listenSoundButton.pack(side=TOP, pady=10)
+setBeepPeriodButton.pack(side=TOP, pady=10)
 closeButton.pack(side=TOP, pady=10)
 
 # ウィンドウの表示
+root.geometry("")
 root.mainloop()
