@@ -1,0 +1,6 @@
+{
+    "max_num_of_tasks": 10,
+    "beep_period_seconds": 10,
+    "default_task_time": 10,
+    "sound_file": "../sound/bark.ogg"
+}

@@ -11,4 +11,19 @@
 language: Python
 GUI lib: Tkinter
 
+# タスク時間の予測
+重回帰分析を使う
+目的変数：
+    タスク実行時間
+説明変数：
+    難易度
+        1~10段階で記録
+    実行時間(過去に同じ種別、難易度のタスクをどれくらい経験したか)
+        秒単位で記録
 
+# todo.db
+executed_task_info
+タスク名        TEXT        PK
+難易度          INTEGER     PK
+登録日時(UT)    INTEGER     PK
+実行時間        INTEGER

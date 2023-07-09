@@ -7,6 +7,8 @@ from typing import Final
 import pygame
 from Task import Task
 from TaskTimeDialog import TaskTimeDialog
+from SettingWindow import SettingWindow
+import json
 
 MAIN_WINDOW_TITLE: Final[str] = "ToDoApp"
 MAIN_WINDOW_WIDTH: Final[str] = "800"
@@ -159,12 +161,20 @@ def listenSound() -> None:
     pygame.mixer.music.play()
 
 
-# ウィンドウを生成
+def editSetting():
+    SettingWindow(root)
+
+
+# 設定ファイル読み込み
+Task.loadSettingFromJson()
+
+# メインウィンドウを生成
 root = Tk()
 root.title(MAIN_WINDOW_TITLE)
 root.bind("<Configure>", _on_move)
 centerWindow(root)
 
+# タスクリスト欄を生成
 taskListFrame = Frame(
     root,
     width=TASK_LIST_FRAME_WIDTH,
@@ -172,9 +182,7 @@ taskListFrame = Frame(
     borderwidth=2,
     relief="solid",
 )
-menuFrame = Frame(root, width=100, height=300, borderwidth=2, relief="solid")
 taskListFrame.grid(row=0, column=0)
-menuFrame.grid(row=0, column=1)
 
 taskListCanvas = Canvas(
     taskListFrame,
@@ -202,20 +210,26 @@ innerTaskListFrame.bind(
 taskListCanvas.bind("<Button-4>", _on_mousewheel)
 taskListCanvas.bind("<Button-5>", _on_mousewheel)
 
-# メニューにボタンを設置
+# メニュー欄を生成
+menuFrame = Frame(root, width=100, height=300, borderwidth=2, relief="solid")
+menuFrame.grid(row=0, column=1)
+
+# メニュー欄にボタンを設置
 addTaskButton = Button(menuFrame, text="add task", command=addTask)
 usageButton = Button(menuFrame, text="usage", command=displayUsage)
-setSoundButton = Button(menuFrame, text="set sound", command=selectSound)
+# setSoundButton = Button(menuFrame, text="set sound", command=selectSound)
 listenSoundButton = Button(menuFrame, text="listen sound", command=listenSound)
-setBeepPeriodButton = Button(menuFrame, text="set beep period", command=setBeepPeriod)
+# setBeepPeriodButton = Button(menuFrame, text="set beep period", command=setBeepPeriod)
+settingButton = Button(menuFrame, text="setting", command=editSetting)
 closeButton = Button(menuFrame, text="close", command=root.destroy)
-addTaskButton.pack(side=TOP, pady=10)
-usageButton.pack(side=TOP, pady=10)
-setSoundButton.pack(side=TOP, pady=10)
-listenSoundButton.pack(side=TOP, pady=10)
-setBeepPeriodButton.pack(side=TOP, pady=10)
-closeButton.pack(side=TOP, pady=10)
+addTaskButton.pack(side=TOP, padx=5, pady=10)
+usageButton.pack(side=TOP, padx=5, pady=10)
+# setSoundButton.pack(side=TOP, pady=10)
+listenSoundButton.pack(side=TOP, padx=5, pady=10)
+# setBeepPeriodButton.pack(side=TOP, pady=10)
+settingButton.pack(side=TOP, padx=5, pady=10)
+closeButton.pack(side=TOP, padx=5, pady=10)
 
-# ウィンドウの表示
+# メインウィンドウを表示
 root.geometry("")
 root.mainloop()

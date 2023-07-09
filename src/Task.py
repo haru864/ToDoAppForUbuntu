@@ -4,15 +4,16 @@ import pygame
 import time
 import threading
 from TaskTimeDialog import TaskTimeDialog
+import json
 
 
 class Task:
-    MAX_NUM_OF_TASKS: Final[int] = 3
-    NUM_OF_USED_TASK_ID: int = 0
-    TASK_ID_POOL: bool = [False for i in range(MAX_NUM_OF_TASKS)]
+    MAX_NUM_OF_TASKS: int = 3
     SOUND_FILE: str = "../sound/bark.ogg"
     BEEP_PERIOD_SECONDS: int = 5
-    DEFAULT_TASK_TIME: Final[int] = 3
+    DEFAULT_TASK_TIME: int = 3
+    NUM_OF_USED_TASK_ID: int = 0
+    TASK_ID_POOL: bool = [False for i in range(MAX_NUM_OF_TASKS)]
     ROOT_WIDGET = None
 
     def __init__(self, taskName: str, leftSeconds: int) -> None:
@@ -23,6 +24,16 @@ class Task:
         self.leftSeconds: int = leftSeconds
         self.isTimerRunning = False
         self.isBeeping = False
+
+    @classmethod
+    def loadSettingFromJson(cls):
+        with open("../setting/conf.json", "r") as confJson:
+            data = json.load(confJson)
+            print(f"loaded JSON: {data}")
+            Task.MAX_NUM_OF_TASKS = data["max_num_of_tasks"]
+            Task.SOUND_FILE = data["sound_file"]
+            Task.BEEP_PERIOD_SECONDS = data["beep_period_seconds"]
+            Task.DEFAULT_TASK_TIME = data["default_task_time"]
 
     def registerLabel(self, taskNameLabel: Label, leftSecondsLabel: Label):
         self.taskNameLabel: Label = taskNameLabel
