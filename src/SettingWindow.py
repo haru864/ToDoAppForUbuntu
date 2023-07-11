@@ -70,6 +70,7 @@ class SettingWindow:
         )
         self.labelSoundFile.configure(text=filename)
 
+    # TODO Implement this method, use ConfJson class to validate value
     def saveEntry(self):
         data = None
         with open("../setting/conf.json", "r") as confJsonRead:

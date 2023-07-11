@@ -22,7 +22,6 @@ TASK_LIST_FRAME_HEIGHT: Final[int] = 500
 
 usageWindow = None
 lastPushedTaskMenuButton: Menubutton = None
-taskname_to_task_dict = {}
 
 
 def centerWindow(window) -> None:
@@ -35,7 +34,11 @@ def centerWindow(window) -> None:
 
 
 def addTask() -> None:
-    taskName = "New Task " + str(len(taskname_to_task_dict) + 1)
+    taskName: str = simpledialog.askstring("Task Name", "Write Task Name")
+    if taskName in Task.REGISTERED_TASK_NAME_SET:
+        messagebox.showerror("ERROR", "This Task Name is already used")
+        return
+
     newTask = None
     try:
         newTask = Task(taskName, Task.DEFAULT_TASK_TIME)
@@ -50,7 +53,6 @@ def addTask() -> None:
     taskLabel = Label(taskFrame, text=taskName, width=45)
     timeLabel = Label(taskFrame, text=newTask.getLeftTimeStr())
     newTask.registerLabel(taskLabel, timeLabel)
-    taskname_to_task_dict[newTask.taskName] = newTask
 
     taskMenuButton = Menubutton(taskFrame, text="SETTING", relief="groove")
     taskMenuButton.menu = Menu(taskMenuButton)
@@ -92,24 +94,20 @@ def setBeepPeriod():
 
 
 def renameTask(label: Label):
-    global taskname_to_task_dict
     currentTaskName: str = label.cget("text")
     newTaskName: str = simpledialog.askstring("New Task Name", "Write New Task Name")
-    if taskname_to_task_dict.get(newTaskName) is not None:
+    if newTaskName in Task.REGISTERED_TASK_NAME_SET:
         messagebox.showerror("ERROR", "This Task Name is already used")
         return
-    currentTask: Task = taskname_to_task_dict[currentTaskName]
+    currentTask: Task = Task.NAME_TO_TASK_DICT[currentTaskName]
     currentTask.rename(newTaskName)
-    del taskname_to_task_dict[currentTaskName]
-    taskname_to_task_dict[newTaskName] = currentTask
     label.config(text=newTaskName)
 
 
 def deleteTask(frame: Frame, task: Task) -> None:
     global lastPushedTaskMenuButton
     frame.destroy()
-    task.delete()
-    del taskname_to_task_dict[task.taskName]
+    task.removeFromRegisteredTasksList()
     lastPushedTaskMenuButton = None
 
 
