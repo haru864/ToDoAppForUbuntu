@@ -1,14 +1,12 @@
 # アプリ終了時に設定を保持できるようにする
 JSONファイルに設定を保存する
+
 tasks.json
 ・登録済みタスク
     タスク名
     残り時間
-conf.json
+
+conf.json (done)
 ・ビープ時間
 ・OGGファイルのパス
-
-# バグ
-add taskで4つ以上登録しようとすると、list index out of range」って表示されてタスク追加出来ない
-
 

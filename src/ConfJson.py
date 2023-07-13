@@ -15,9 +15,7 @@ class ConfJson:
         self.sound_file: str = sound_file
         errMsgList = self.validate()
         if len(errMsgList) != 0:
-            raise Exception(
-                "Invalid values were found in ConfJson.__init__()", errMsgList
-            )
+            raise Exception(errMsgList)
 
     def validate(self) -> list:
         errMsgList = []
@@ -29,4 +27,14 @@ class ConfJson:
             errMsgList.append("DEFAULT_TASK_TIME must be digit")
         if os.path.isfile(self.sound_file) is False:
             errMsgList.append("SOUND_FILE must be existing file")
+        if self.sound_file.endswith(".ogg") is False:
+            errMsgList.append("SOUND_FILE must be ogg file")
         return errMsgList
+
+    def generateDict(self) -> dict:
+        data = {}
+        data["max_num_of_tasks"] = int(self.max_num_of_tasks)
+        data["beep_period_seconds"] = int(self.beep_period_seconds)
+        data["default_task_time"] = int(self.default_task_time)
+        data["sound_file"] = self.sound_file
+        return data

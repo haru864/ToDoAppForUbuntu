@@ -32,7 +32,7 @@ class Task:
     def loadSettingFromJson(cls):
         with open("setting/conf.json", "r") as confJson:
             data = json.load(confJson)
-            print(f"loaded JSON: {data}")
+            # print(f"[Task.py] loaded JSON: {data}")
             Task.MAX_NUM_OF_TASKS = data["max_num_of_tasks"]
             Task.SOUND_FILE = data["sound_file"]
             Task.BEEP_PERIOD_SECONDS = data["beep_period_seconds"]

@@ -1,7 +1,9 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import messagebox
 from Task import Task
+from ConfJson import ConfJson
 import json
 
 
@@ -66,24 +68,29 @@ class SettingWindow:
 
     def browseFiles(self):
         filename = filedialog.askopenfilename(
-            initialdir="../sound", title="Select a File"
+            filetypes=[("OGG files", "*.ogg")],
+            initialdir="sound",
+            title="Select a File",
         )
         self.labelSoundFile.configure(text=filename)
 
     # TODO Implement this method, use ConfJson class to validate value
     def saveEntry(self):
-        data = None
-        with open("../setting/conf.json", "r") as confJsonRead:
-            data = json.load(confJsonRead)
-            print(type(data))
-        data["max_num_of_tasks"] = self.entryMaxNumOfTasks.get()
-        data["sound_file"] = self.labelSoundFile.cget("text")
-        data["beep_period_seconds"] = self.entryBeepPeriodSeconds.get()
-        data["default_task_time"] = self.entryDefaultTaskTime.get()
-        print(f"updated JSON: {data}")
-        # with open("../setting/conf.json", "w") as confJsonWrite:
-        #     json.dump(data, confJsonWrite)
-        Task.loadSettingFromJson()
+        try:
+            confJson = ConfJson(
+                max_num_of_tasks=self.entryMaxNumOfTasks.get(),
+                beep_period_seconds=self.entryBeepPeriodSeconds.get(),
+                default_task_time=self.entryDefaultTaskTime.get(),
+                sound_file=self.labelSoundFile.cget("text"),
+            )
+            with open("setting/conf.json", "w") as confJsonWrite:
+                json.dump(confJson.generateDict(), confJsonWrite)
+            Task.loadSettingFromJson()
+            self.closeWindow()
+        except Exception as e:
+            errMsgList: list = e.args[0]
+            errMsgString: str = "\n".join(errMsgList)
+            messagebox.showinfo("ERROR", errMsgString)
 
     def closeWindow(self):
         self.window.destroy()
