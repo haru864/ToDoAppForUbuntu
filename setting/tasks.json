@@ -1,0 +1,18 @@
+[
+    {
+        "taskName": "Task_01",
+        "leftSeconds": 1
+    },
+    {
+        "taskName": "Task_02",
+        "leftSeconds": 2
+    },
+    {
+        "taskName": "Task_03",
+        "leftSeconds": 3
+    },
+    {
+        "taskName": "Task_04",
+        "leftSeconds": 4
+    }
+]

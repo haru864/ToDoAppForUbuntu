@@ -31,6 +31,9 @@ class ConfJson:
             errMsgList.append("SOUND_FILE must be ogg file")
         return errMsgList
 
+    def loadConfJson(self):
+        pass
+
     def generateDict(self) -> dict:
         data = {}
         data["max_num_of_tasks"] = int(self.max_num_of_tasks)

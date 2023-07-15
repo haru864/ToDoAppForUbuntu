@@ -6,6 +6,7 @@ from tkinter import simpledialog
 from typing import Final
 import pygame
 from Task import Task
+from TasksJson import TasksJson
 from TaskTimeDialog import TaskTimeDialog
 from SettingWindow import SettingWindow
 import json
@@ -33,24 +34,23 @@ def centerWindow(window) -> None:
     window.geometry(f"+{x}+{y}")
 
 
-def addTask() -> None:
-    taskName: str = simpledialog.askstring("Task Name", "Write Task Name")
-    if taskName in Task.REGISTERED_TASK_NAME_SET:
-        messagebox.showerror("ERROR", "This Task Name is already used")
-        return
-
+def addTask(task: Task = None) -> None:
     newTask = None
-    try:
-        newTask = Task(taskName, Task.DEFAULT_TASK_TIME)
-    except Exception as e:
-        print(f"Exception in generating Task: {e}")
-        messagebox.showinfo("ERROR", e)
-        return
+    if task is None:
+        taskName: str = simpledialog.askstring("Task Name", "Write Task Name")
+        try:
+            newTask = Task(taskName, Task.DEFAULT_TASK_TIME)
+        except Exception as e:
+            print(f"Exception in generating Task: {e}")
+            messagebox.showerror("ERROR", e)
+            return
+    else:
+        newTask = task
 
     taskFrame = Frame(
         innerTaskListFrame, width=70, height=10, borderwidth=0.5, relief="solid"
     )
-    taskLabel = Label(taskFrame, text=taskName, width=45)
+    taskLabel = Label(taskFrame, text=newTask.taskName, width=45)
     timeLabel = Label(taskFrame, text=newTask.getLeftTimeStr())
     newTask.registerLabel(taskLabel, timeLabel)
 
@@ -88,9 +88,8 @@ def addTask() -> None:
     )
 
 
-def setBeepPeriod():
-    Task.setRootWidget(root=root)
-    Task.setBeepPeriod()
+def saveTasks():
+    pass
 
 
 def renameTask(label: Label):
@@ -107,7 +106,7 @@ def renameTask(label: Label):
 def deleteTask(frame: Frame, task: Task) -> None:
     global lastPushedTaskMenuButton
     frame.destroy()
-    task.removeFromRegisteredTasksList()
+    task.delete()
     lastPushedTaskMenuButton = None
 
 
@@ -145,12 +144,6 @@ def displayUsage() -> None:
     usageWindow.geometry(USAGE_WINDOW_SIZE)
     centerWindow(usageWindow)
     usageWindow.lift()
-
-
-def selectSound() -> None:
-    Task.SOUND_FILE = filedialog.askopenfilename(
-        filetypes=[("OGG files", "*.ogg")], initialdir="../sound"
-    )
 
 
 def listenSound() -> None:
@@ -208,6 +201,13 @@ innerTaskListFrame.bind(
 taskListCanvas.bind("<Button-4>", _on_mousewheel)
 taskListCanvas.bind("<Button-5>", _on_mousewheel)
 
+# 登録済みタスクを読み込み
+tasksJson = TasksJson()
+tasksJson.loadTasksJson()
+print(f"loading tasksJson... {tasksJson}")
+for currTask in tasksJson.registeredTasksList:
+    addTask(currTask)
+
 # メニュー欄を生成
 menuFrame = Frame(root, width=100, height=300, borderwidth=2, relief="solid")
 menuFrame.grid(row=0, column=1)
@@ -215,16 +215,12 @@ menuFrame.grid(row=0, column=1)
 # メニュー欄にボタンを設置
 addTaskButton = Button(menuFrame, text="add task", command=addTask)
 usageButton = Button(menuFrame, text="usage", command=displayUsage)
-# setSoundButton = Button(menuFrame, text="set sound", command=selectSound)
 listenSoundButton = Button(menuFrame, text="listen sound", command=listenSound)
-# setBeepPeriodButton = Button(menuFrame, text="set beep period", command=setBeepPeriod)
 settingButton = Button(menuFrame, text="setting", command=editSetting)
 closeButton = Button(menuFrame, text="close", command=root.destroy)
 addTaskButton.pack(side=TOP, padx=5, pady=10)
 usageButton.pack(side=TOP, padx=5, pady=10)
-# setSoundButton.pack(side=TOP, pady=10)
 listenSoundButton.pack(side=TOP, padx=5, pady=10)
-# setBeepPeriodButton.pack(side=TOP, pady=10)
 settingButton.pack(side=TOP, padx=5, pady=10)
 closeButton.pack(side=TOP, padx=5, pady=10)
 

@@ -12,7 +12,7 @@ class Task:
     SOUND_FILE: str = None
     BEEP_PERIOD_SECONDS: int = 5
     DEFAULT_TASK_TIME: int = 3
-    NAME_TO_TASK_DICT: dict = dict()
+    NAME_TO_TASK_DICT: dict = {}
     REGISTERED_TASK_NAME_SET: set[str] = set()
     ROOT_WIDGET = None
 
@@ -21,6 +21,8 @@ class Task:
             raise Exception("Cannot register any more tasks")
         if taskName in Task.REGISTERED_TASK_NAME_SET:
             raise Exception("This task name is already used")
+        if isinstance(leftSeconds, int) == False or leftSeconds < 0:
+            raise Exception("Task time must be digit")
         self.taskName: str = taskName
         Task.REGISTERED_TASK_NAME_SET.add(taskName)
         Task.NAME_TO_TASK_DICT[taskName] = self
@@ -75,15 +77,12 @@ class Task:
             return
         Task.BEEP_PERIOD_SECONDS = dialog.result
 
-    def rename(self, newTaskName: str):
+    def rename(self, newTaskName: str) -> None:
         self.taskName = newTaskName
 
-    def removeFromRegisteredTasksList(self) -> None:
-        for i in len(Task.REGISTERED_TASKS_LIST):
-            if Task.REGISTERED_TASKS_LIST[i] is self:
-                del Task.REGISTERED_TASKS_LIST[i]
-                return
-        print(f"removed from {Task.REGISTERED_TASKS_LIST}")
+    def delete(self) -> None:
+        Task.REGISTERED_TASK_NAME_SET.remove(self.taskName)
+        Task.NAME_TO_TASK_DICT.pop(self.taskName)
 
     def startTask(self):
         self.isTimerRunning = True
@@ -129,4 +128,7 @@ class Task:
             self.startBeep()
 
     def __str__(self) -> str:
-        return f"taskName:{self.taskName}, leftSeconds;{self.leftSeconds}"
+        return f"taskName:{self.taskName}, leftSeconds:{self.leftSeconds}"
+
+    def __repr__(self):
+        return f"{{{self.taskName},{self.leftSeconds},{self.isTimerRunning},{self.isBeeping}}}"
