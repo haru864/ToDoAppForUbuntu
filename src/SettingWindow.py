@@ -1,59 +1,59 @@
-from tkinter import *
-from tkinter import ttk
+import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
-from Task import Task
+from Setting import Setting
 from ConfJson import ConfJson
-import json
 
 
 class SettingWindow:
-    def __init__(self, master: Tk = None) -> None:
+    def __init__(self, master: tk.Tk = None) -> None:
         self.master = master
-        self.window = Toplevel(master)
+        self.window = tk.Toplevel(master)
         self.window.title("Setting")
         self.placeWindow()
 
         # ラベル作成
-        self.labelMaxNumOfTasks = Label(self.window, text="MAX_NUM_OF_TASKS:")
-        self.labelSoundFile = Label(self.window, text="SOUND_FILE:")
-        self.labelBeepPeriodSeconds = Label(self.window, text="BEEP_PERIOD_SECONDS:")
-        self.labelDefaultTaskTime = Label(self.window, text="DEFAULT_TASK_TIME:")
+        self.labelMaxNumOfTasks = tk.Label(self.window, text="MAX_NUM_OF_TASKS:")
+        self.labelSoundFile = tk.Label(self.window, text="SOUND_FILE:")
+        self.labelBeepPeriodSeconds = tk.Label(self.window, text="BEEP_PERIOD_SECONDS:")
+        self.labelDefaultTaskTime = tk.Label(self.window, text="DEFAULT_TASK_TIME:")
         self.labelMaxNumOfTasks.grid(row=0, column=0)
         self.labelBeepPeriodSeconds.grid(row=1, column=0)
         self.labelDefaultTaskTime.grid(row=2, column=0)
         self.labelSoundFile.grid(row=3, column=0)
 
         # 数値を入力するテキストボックス作成
-        self.entryMaxNumOfTasks = Entry(
-            self.window, textvariable=IntVar(value=Task.MAX_NUM_OF_TASKS)
+        self.entryMaxNumOfTasks = tk.Entry(
+            self.window, textvariable=tk.IntVar(value=Setting.MAX_NUM_OF_TASKS)
         )
-        self.entryBeepPeriodSeconds = Entry(
-            self.window, textvariable=IntVar(value=Task.BEEP_PERIOD_SECONDS)
+        self.entryBeepPeriodSeconds = tk.Entry(
+            self.window, textvariable=tk.IntVar(value=Setting.BEEP_PERIOD_SECONDS)
         )
-        self.entryDefaultTaskTime = Entry(
-            self.window, textvariable=IntVar(value=Task.DEFAULT_TASK_TIME)
+        self.entryDefaultTaskTime = tk.Entry(
+            self.window, textvariable=tk.IntVar(value=Setting.DEFAULT_TASK_TIME)
         )
         self.entryMaxNumOfTasks.grid(row=0, column=1)
         self.entryBeepPeriodSeconds.grid(row=1, column=1)
         self.entryDefaultTaskTime.grid(row=2, column=1)
 
         # ファイル選択ダイアログを表示するボタン作成
-        self.buttonExplore = Button(
+        self.buttonExplore = tk.Button(
             self.window, text="Browse Files", command=self.browseFiles
         )
         self.buttonExplore.grid(row=4, column=1)
 
         # ファイルパスを表示するラベル作成
-        self.labelSoundFile = Label(self.window, text=Task.SOUND_FILE, fg="blue")
+        self.labelSoundFile = tk.Label(self.window, text=Setting.SOUND_FILE, fg="blue")
         self.labelSoundFile.grid(row=3, column=1)
 
         # セーブボタン作成
-        self.buttonSave = Button(self.window, text="Save", command=self.saveEntry)
+        self.buttonSave = tk.Button(self.window, text="Save", command=self.saveEntry)
         self.buttonSave.grid(row=5, column=0)
 
         # クローズボタン作成
-        self.buttonClose = Button(self.window, text="Close", command=self.closeWindow)
+        self.buttonClose = tk.Button(
+            self.window, text="Close", command=self.closeWindow
+        )
         self.buttonClose.grid(row=5, column=1)
 
     def placeWindow(self):
@@ -74,20 +74,32 @@ class SettingWindow:
         )
         self.labelSoundFile.configure(text=filename)
 
-    # TODO Implement this method, use ConfJson class to validate value
     def saveEntry(self):
+        newMaxNumOfTasks = None
+        newBeepPeriodSeconds = None
+        newDefaultTaskTime = None
+        newSoundFile = None
         try:
-            confJson = ConfJson(
-                max_num_of_tasks=self.entryMaxNumOfTasks.get(),
-                beep_period_seconds=self.entryBeepPeriodSeconds.get(),
-                default_task_time=self.entryDefaultTaskTime.get(),
-                sound_file=self.labelSoundFile.cget("text"),
+            newMaxNumOfTasks = int(self.entryMaxNumOfTasks.get())
+            newBeepPeriodSeconds = int(self.entryBeepPeriodSeconds.get())
+            newDefaultTaskTime = int(self.entryDefaultTaskTime.get())
+            newSoundFile = self.labelSoundFile.cget("text")
+        except Exception as e:
+            print(f"SettingWindow.saveEntry(): {e}")
+            errMsgString: str = e.args[0]
+            messagebox.showinfo("ERROR", errMsgString)
+        try:
+            Setting.updateSetting(
+                newMaxNumOfTasks=newMaxNumOfTasks,
+                newBeepPeriodSeconds=newBeepPeriodSeconds,
+                newDefaultTaskTime=newDefaultTaskTime,
+                newSoundFile=newSoundFile,
             )
-            with open("setting/conf.json", "w") as confJsonWrite:
-                json.dump(confJson.generateDict(), confJsonWrite)
-            Task.loadSettingFromJson()
+            confJson = ConfJson()
+            confJson.updateConfJsonFileBySetting()
             self.closeWindow()
         except Exception as e:
+            print(f"SettingWindow.saveEntry(): {e}")
             errMsgList: list = e.args[0]
             errMsgString: str = "\n".join(errMsgList)
             messagebox.showinfo("ERROR", errMsgString)

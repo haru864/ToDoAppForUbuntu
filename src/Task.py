@@ -1,48 +1,33 @@
-from tkinter import *
-from typing import Final
+import tkinter as tk
 import pygame
 import time
 import threading
 from TaskTimeDialog import TaskTimeDialog
-import json
+from typing import Optional
 
 
 class Task:
-    MAX_NUM_OF_TASKS: int = 3
-    SOUND_FILE: str = None
-    BEEP_PERIOD_SECONDS: int = 5
-    DEFAULT_TASK_TIME: int = 3
-    NAME_TO_TASK_DICT: dict = {}
-    REGISTERED_TASK_NAME_SET: set[str] = set()
     ROOT_WIDGET = None
 
-    def __init__(self, taskName: str, leftSeconds: int) -> None:
-        if len(Task.REGISTERED_TASK_NAME_SET) >= Task.MAX_NUM_OF_TASKS:
-            raise Exception("Cannot register any more tasks")
-        if taskName in Task.REGISTERED_TASK_NAME_SET:
-            raise Exception("This task name is already used")
-        if isinstance(leftSeconds, int) == False or leftSeconds < 0:
+    def __init__(
+        self, taskName: Optional[str | None], leftSeconds: Optional[int | None]
+    ) -> None:
+        if taskName is None:
+            raise Exception("Task Name can't be empty")
+        if (
+            leftSeconds is None
+            or isinstance(leftSeconds, int) == False
+            or leftSeconds < 0
+        ):
             raise Exception("Task time must be digit")
         self.taskName: str = taskName
-        Task.REGISTERED_TASK_NAME_SET.add(taskName)
-        Task.NAME_TO_TASK_DICT[taskName] = self
         self.leftSeconds: int = leftSeconds
         self.isTimerRunning = False
         self.isBeeping = False
 
-    @classmethod
-    def loadSettingFromJson(cls):
-        with open("setting/conf.json", "r") as confJson:
-            data = json.load(confJson)
-            # print(f"[Task.py] loaded JSON: {data}")
-            Task.MAX_NUM_OF_TASKS = data["max_num_of_tasks"]
-            Task.SOUND_FILE = data["sound_file"]
-            Task.BEEP_PERIOD_SECONDS = data["beep_period_seconds"]
-            Task.DEFAULT_TASK_TIME = data["default_task_time"]
-
-    def registerLabel(self, taskNameLabel: Label, leftSecondsLabel: Label):
-        self.taskNameLabel: Label = taskNameLabel
-        self.leftSecondsLabel: Label = leftSecondsLabel
+    def registerLabel(self, taskNameLabel: tk.Label, leftSecondsLabel: tk.Label):
+        self.taskNameLabel: tk.Label = taskNameLabel
+        self.leftSecondsLabel: tk.Label = leftSecondsLabel
 
     def getLeftTimeStr(self):
         seconds: int = self.leftSeconds
@@ -66,22 +51,10 @@ class Task:
         self.leftSeconds = dialog.result
         self.leftSecondsLabel.config(text=self.getLeftTimeStr())
 
-    @classmethod
-    def setBeepPeriod(cls):
-        dialog = TaskTimeDialog(
-            windowParent=Task.ROOT_WIDGET,
-            windowTitle="Beep Period Update",
-            initialValueSeconds=Task.BEEP_PERIOD_SECONDS,
-        )
-        if dialog.result is None:
-            return
-        Task.BEEP_PERIOD_SECONDS = dialog.result
-
     def rename(self, newTaskName: str) -> None:
         self.taskName = newTaskName
 
     def delete(self) -> None:
-        Task.REGISTERED_TASK_NAME_SET.remove(self.taskName)
         Task.NAME_TO_TASK_DICT.pop(self.taskName)
 
     def startTask(self):

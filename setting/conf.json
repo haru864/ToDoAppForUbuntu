@@ -1,1 +1,1 @@
-{"max_num_of_tasks": 10, "beep_period_seconds": 3, "default_task_time": 10, "sound_file": "/home/haru/project/ToDoApp/sound/sonar.ogg"}
+{"max_num_of_tasks": 2, "beep_period_seconds": 4, "default_task_time": 3, "sound_file": "/home/haru/project/ToDoApp/sound/sonar.ogg"}

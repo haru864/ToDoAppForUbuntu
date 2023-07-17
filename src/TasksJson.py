@@ -1,14 +1,14 @@
 from typing import Optional
 from Task import Task
 import json
-import copy
 
 
 class TasksJson:
     def __init__(self) -> None:
         self.registeredTasksList: list[Task] = []
+        self.isSynchronizedWithTasksJsonFile: bool = False
 
-    def addTask(self, task: Optional[Task]) -> None:
+    def addTask(self, task: Optional[Task | None]) -> None:
         if task is None:
             return
         self.registeredTasksList.append(task)
@@ -19,6 +19,7 @@ class TasksJson:
             data = json.load(taskJson)
         if data is None or isinstance(data, list) == False:
             self.registeredTasksList = []
+            self.isSynchronizedWithTasksJsonFile = False
             return
         for currDict in data:
             try:
@@ -30,7 +31,9 @@ class TasksJson:
             except Exception as e:
                 print(f"TasksJson.loadTasksJson() -> {e}")
                 self.registeredTasksList = []
+                self.isSynchronizedWithTasksJsonFile = False
                 return
+        self.isSynchronizedWithTasksJsonFile = True
 
     def saveRegisteredTasks(self) -> None:
         taskInfoList: list[dict] = []
@@ -44,10 +47,7 @@ class TasksJson:
             return
         with open("setting/tasks.json", "w") as taskJson:
             json.dump(taskInfoList, TasksJson)
+        self.isSynchronizedWithTasksJsonFile = True
 
     def __str__(self) -> str:
-        retval: str = "["
-        retval += "]"
-        print(type(self.registeredTasksList[0]))
-        print(self.registeredTasksList[0])
         return str(self.registeredTasksList)
