@@ -1,18 +1,14 @@
 [
     {
-        "taskName": "Task_01",
+        "taskName": "dsad",
         "leftSeconds": 1
     },
     {
-        "taskName": "Task_02",
-        "leftSeconds": 2
-    },
-    {
-        "taskName": "Task_03",
+        "taskName": "dddd",
         "leftSeconds": 3
     },
     {
         "taskName": "Task_04",
-        "leftSeconds": 4
+        "leftSeconds": 45
     }
 ]

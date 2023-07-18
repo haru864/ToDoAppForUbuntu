@@ -4,6 +4,7 @@ import time
 import threading
 from TaskTimeDialog import TaskTimeDialog
 from typing import Optional
+from Setting import Setting
 
 
 class Task:
@@ -44,7 +45,7 @@ class Task:
         dialog = TaskTimeDialog(
             windowParent=self.leftSecondsLabel,
             windowTitle="Task Period Update",
-            initialValueSeconds=Task.DEFAULT_TASK_TIME,
+            initialValueSeconds=Setting.DEFAULT_TASK_TIME,
         )
         if dialog.result is None:
             return
@@ -53,9 +54,6 @@ class Task:
 
     def rename(self, newTaskName: str) -> None:
         self.taskName = newTaskName
-
-    def delete(self) -> None:
-        Task.NAME_TO_TASK_DICT.pop(self.taskName)
 
     def startTask(self):
         self.isTimerRunning = True
@@ -76,11 +74,11 @@ class Task:
 
     def beep(self):
         pygame.init()
-        pygame.mixer.music.load(Task.SOUND_FILE)
+        pygame.mixer.music.load(Setting.SOUND_FILE)
         start_time = time.time()
         while self.isBeeping:
             elapsed_time = time.time() - start_time
-            if elapsed_time >= Task.BEEP_PERIOD_SECONDS:
+            if elapsed_time >= Setting.BEEP_PERIOD_SECONDS:
                 pygame.mixer.music.stop()
                 break
             while pygame.mixer.music.get_busy():

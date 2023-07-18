@@ -9,22 +9,33 @@ from SettingWindow import SettingWindow
 from Setting import Setting
 
 usageWindow = None
+lastPushedTaskMenuButton: tk.Menubutton = None
+
+MAIN_WINDOW_TITLE: Final[str] = "ToDoApp"
+MAIN_WINDOW_WIDTH: Final[str] = "800"
+MAIN_WINDOW_HEIGHT: Final[str] = "600"
+MAIN_WINDOW_SIZE: Final[str] = f"{MAIN_WINDOW_WIDTH}x{MAIN_WINDOW_HEIGHT}"
 USAGE_WINDOW_WIDTH: Final[str] = "400"
 USAGE_WINDOW_HEIGHT: Final[str] = "400"
 USAGE_WINDOW_SIZE: Final[str] = f"{USAGE_WINDOW_WIDTH}x{USAGE_WINDOW_HEIGHT}"
 
 
-class MainWindow:
+class MainWindow(tk.Tk):
     TASK_LIST_FRAME_WIDTH: Final[int] = 650
     TASK_LIST_FRAME_HEIGHT: Final[int] = 500
     NAME_TO_TASK_DICT: dict[str, "Task"] = {}
 
-    def __init__(self, root: tk.Tk) -> None:
-        self.root: tk.Tk = root
+    def __init__(self) -> None:
+        super().__init__()
+        self.title(MAIN_WINDOW_TITLE)
+        self.bind("<Configure>", self._on_move)
+        self.centerWindow(self)
+        self.geometry("")
+        self.protocol("WM_DELETE_WINDOW", self._on_closing)
 
         # タスクリスト欄を生成
         self.taskListFrame = tk.Frame(
-            self.root,
+            self,
             width=MainWindow.TASK_LIST_FRAME_WIDTH,
             height=MainWindow.TASK_LIST_FRAME_HEIGHT,
             borderwidth=2,
@@ -70,7 +81,7 @@ class MainWindow:
             self.addTask(currTask)
 
         # メニュー欄を生成
-        menuFrame = tk.Frame(root, width=100, height=300, borderwidth=2, relief="solid")
+        menuFrame = tk.Frame(self, width=100, height=300, borderwidth=2, relief="solid")
         menuFrame.grid(row=0, column=1)
 
         # メニュー欄にボタンを設置
@@ -80,7 +91,7 @@ class MainWindow:
             menuFrame, text="listen sound", command=self.listenSound
         )
         settingButton = tk.Button(menuFrame, text="setting", command=self.editSetting)
-        closeButton = tk.Button(menuFrame, text="close", command=root.destroy)
+        closeButton = tk.Button(menuFrame, text="close", command=self.closeApp)
         addTaskButton.pack(side=tk.TOP, padx=5, pady=10)
         usageButton.pack(side=tk.TOP, padx=5, pady=10)
         listenSoundButton.pack(side=tk.TOP, padx=5, pady=10)
@@ -103,7 +114,6 @@ class MainWindow:
                 return
         else:
             newTask = task
-
         MainWindow.NAME_TO_TASK_DICT[newTask.taskName] = newTask
 
         taskFrame = tk.Frame(
@@ -149,7 +159,6 @@ class MainWindow:
             "<Button-1>",
             lambda event, menuButton=taskMenuButton: self.menuButtonAction(menuButton),
         )
-        self.saveTasks()
 
     def _on_mousewheel(self, event) -> None:
         scrollRegion = self.taskListCanvas.cget("scrollregion")
@@ -187,29 +196,51 @@ class MainWindow:
         pygame.mixer.music.play()
 
     def editSetting(self):
-        SettingWindow(self.root)
+        SettingWindow(MainWindow.ROOT)
 
     def renameTask(self, label: tk.Label):
         currentTaskName: str = label.cget("text")
         newTaskName: str = simpledialog.askstring(
             "New Task Name", "Write New Task Name"
         )
-        if newTaskName in Task.REGISTERED_TASK_NAME_SET:
+        if newTaskName in MainWindow.NAME_TO_TASK_DICT:
             messagebox.showerror("ERROR", "This Task Name is already used")
             return
-        currentTask: Task = Task.NAME_TO_TASK_DICT[currentTaskName]
+        currentTask: Task = MainWindow.NAME_TO_TASK_DICT[currentTaskName]
         currentTask.rename(newTaskName)
         label.config(text=newTaskName)
 
     def deleteTask(self, frame: tk.Frame, task: Task) -> None:
         global lastPushedTaskMenuButton
         frame.destroy()
-        task.delete()
         lastPushedTaskMenuButton = None
+        MainWindow.NAME_TO_TASK_DICT.pop(task.taskName)
 
     def menuButtonAction(self, menuButton: tk.Menubutton) -> None:
         global lastPushedTaskMenuButton
         lastPushedTaskMenuButton = menuButton
 
     def saveTasks(self) -> None:
-        pass
+        try:
+            tasksJson = TasksJson()
+            tasklist = list(MainWindow.NAME_TO_TASK_DICT.values())
+            tasksJson.updateTaskList(tasklist)
+            tasksJson.saveRegisteredTasks()
+        except Exception as e:
+            print(f"MainWindow.saveTasks: {e}")
+            messagebox.showerror("ERROR", e)
+            return
+
+    def closeApp(self) -> None:
+        print("closing application...")
+        self.saveTasks()
+        self.destroy()
+
+    def _on_move(self, event=None) -> None:
+        global lastPushedTaskMenuButton
+        if lastPushedTaskMenuButton is None:
+            return
+        lastPushedTaskMenuButton.menu.unpost()
+
+    def _on_closing(self) -> None:
+        self.closeApp()
