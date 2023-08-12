@@ -8,16 +8,29 @@ class TasksJson:
     def __init__(self) -> None:
         self.registeredTasksList: list[Task] = []
         self.isSynchronizedWithTasksJsonFile: bool = False
+        self.loadTasksJson()
 
-    def addTask(self, task: Optional[Task | None]) -> None:
+    def getNumOfTasksRegisteredInJson(self) -> int:
+        return len(self.registeredTasksList)
+
+    def isRegisteredTaskName(self, taskName: str) -> bool:
+        for task in self.registeredTasksList:
+            if taskName == task.taskName:
+                return True
+        return False
+
+    def addTaskToTasksJson(self, task: Optional[Task | None]) -> None:
         if task is None:
             return
         self.registeredTasksList.append(task)
+        self.saveRegisteredTasks()
+        self.loadTasksJson()
 
     def updateTaskList(self, newtasklist: Optional[list[Task] | None]):
         if newtasklist is None:
             return
         self.registeredTasksList = copy.copy(newtasklist)
+        self.saveRegisteredTasks()
 
     def loadTasksJson(self) -> None:
         data = None

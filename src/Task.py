@@ -2,7 +2,6 @@ import tkinter as tk
 import pygame
 import time
 import threading
-from TaskTimeDialog import TaskTimeDialog
 from typing import Optional
 from Setting import Setting
 
@@ -40,17 +39,6 @@ class Task:
     @classmethod
     def setRootWidget(cls, root):
         Task.ROOT_WIDGET = root
-
-    def setLeftSeconds(self):
-        dialog = TaskTimeDialog(
-            windowParent=self.leftSecondsLabel,
-            windowTitle="Task Period Update",
-            initialValueSeconds=Setting.DEFAULT_TASK_TIME,
-        )
-        if dialog.result is None:
-            return
-        self.leftSeconds = dialog.result
-        self.leftSecondsLabel.config(text=self.getLeftTimeStr())
 
     def rename(self, newTaskName: str) -> None:
         self.taskName = newTaskName

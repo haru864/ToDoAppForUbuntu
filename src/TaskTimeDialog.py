@@ -42,11 +42,11 @@ class TaskTimeDialog(simpledialog.Dialog):
                 or seconds > 59
             ):
                 raise ValueError
-            self.result: int = self.timeToSeconds(hours, minutes, seconds)
+            self.result: int = self.__timeToSeconds(hours, minutes, seconds)
             return 1
         except ValueError:
             messagebox.showerror("ERROR", "hours:0~24, minutes:0~59, seconds:0~59")
             return 0
 
-    def timeToSeconds(self, hours, minutes, seconds) -> int:
+    def __timeToSeconds(self, hours, minutes, seconds) -> int:
         return hours * 3600 + minutes * 60 + seconds

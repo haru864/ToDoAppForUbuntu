@@ -18,7 +18,6 @@ def main():
     Setting.updateSetting(
         newMaxNumOfTasks=confJson.max_num_of_tasks,
         newBeepPeriodSeconds=confJson.beep_period_seconds,
-        newDefaultTaskTime=confJson.default_task_time,
         newSoundFile=confJson.sound_file,
     )
 

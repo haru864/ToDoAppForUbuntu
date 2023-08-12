@@ -1,12 +1,14 @@
 import tkinter as tk
 import pygame
 from typing import Final
+from TaskTimeDialog import TaskTimeDialog
 from TasksJson import TasksJson
 from tkinter import simpledialog
 from Task import Task
 from tkinter import messagebox
 from SettingWindow import SettingWindow
 from Setting import Setting
+from AddTaskWindow import AddTaskWindow
 
 usageWindow = None
 lastPushedTaskMenuButton: tk.Menubutton = None
@@ -74,18 +76,16 @@ class MainWindow(tk.Tk):
         self.taskListCanvas.bind("<Button-5>", self._on_mousewheel)
 
         # 登録済みタスクを読み込み
-        tasksJson = TasksJson()
-        tasksJson.loadTasksJson()
-        print(f"loading tasksJson... {tasksJson}")
-        for currTask in tasksJson.registeredTasksList:
-            self.addTask(currTask)
+        self.setTasksToTaskListFrame()
 
         # メニュー欄を生成
         menuFrame = tk.Frame(self, width=100, height=300, borderwidth=2, relief="solid")
         menuFrame.grid(row=0, column=1)
 
         # メニュー欄にボタンを設置
-        addTaskButton = tk.Button(menuFrame, text="add task", command=self.addTask)
+        addTaskButton = tk.Button(
+            menuFrame, text="add task", command=self.addTaskToTasksJson
+        )
         usageButton = tk.Button(menuFrame, text="usage", command=self.displayUsage)
         listenSoundButton = tk.Button(
             menuFrame, text="listen sound", command=self.listenSound
@@ -98,67 +98,62 @@ class MainWindow(tk.Tk):
         settingButton.pack(side=tk.TOP, padx=5, pady=10)
         closeButton.pack(side=tk.TOP, padx=5, pady=10)
 
-    def addTask(self, task: Task = None) -> None:
-        newTask = None
-        if task is None:
-            taskName: str = simpledialog.askstring("Task Name", "Write Task Name")
-            try:
-                newTask = Task(taskName, Setting.DEFAULT_TASK_TIME)
-                if len(MainWindow.NAME_TO_TASK_DICT) >= Setting.MAX_NUM_OF_TASKS:
-                    raise Exception("Cannot register any more tasks")
-                if taskName in MainWindow.NAME_TO_TASK_DICT:
-                    raise Exception("This task name is already used")
-            except Exception as e:
-                print(f"MainWindow.addTask: {e}")
-                messagebox.showerror("ERROR", e)
-                return
-        else:
-            newTask = task
-        MainWindow.NAME_TO_TASK_DICT[newTask.taskName] = newTask
+    def addTaskToTasksJson(self) -> None:
+        AddTaskWindow(self)
+        self.setTasksToTaskListFrame()
 
-        taskFrame = tk.Frame(
-            self.innerTaskListFrame,
-            width=70,
-            height=10,
-            borderwidth=0.5,
-            relief="solid",
-        )
-        taskLabel = tk.Label(taskFrame, text=newTask.taskName, width=45)
-        timeLabel = tk.Label(taskFrame, text=newTask.getLeftTimeStr())
-        newTask.registerLabel(taskLabel, timeLabel)
+    def setTasksToTaskListFrame(self) -> None:
+        for child in self.innerTaskListFrame.winfo_children():
+            child.destroy()
 
-        taskMenuButton = tk.Menubutton(taskFrame, text="SETTING", relief="groove")
-        taskMenuButton.menu = tk.Menu(taskMenuButton)
-        taskMenuButton.menu.add_command(
-            label="rename",
-            command=lambda label=taskLabel: self.renameTask(label),
-        )
-        taskMenuButton.menu.add_command(
-            label="set time",
-            command=lambda: newTask.setLeftSeconds(),
-        )
-        taskMenuButton.menu.add_command(
-            label="delete",
-            command=lambda frame=taskFrame, task=newTask: self.deleteTask(frame, task),
-        )
-        startButton = tk.Button(
-            taskFrame, text="START", command=lambda task=newTask: task.startTask()
-        )
-        stopButton = tk.Button(
-            taskFrame, text="STOP", command=lambda task=newTask: task.stopTask()
-        )
+        tasksJson = TasksJson()
+        print(f"loading tasksJson... {tasksJson}")
+        for currTask in tasksJson.registeredTasksList:
+            MainWindow.NAME_TO_TASK_DICT[currTask.taskName] = currTask
 
-        taskFrame.pack(fill=tk.X)
-        taskLabel.pack(side=tk.LEFT)
-        timeLabel.pack(side=tk.LEFT)
-        taskMenuButton.pack(side=tk.LEFT)
-        startButton.pack(side=tk.LEFT)
-        stopButton.pack(side=tk.LEFT)
-        taskMenuButton["menu"] = taskMenuButton.menu
-        taskMenuButton.bind(
-            "<Button-1>",
-            lambda event, menuButton=taskMenuButton: self.menuButtonAction(menuButton),
-        )
+            taskFrame = tk.Frame(
+                self.innerTaskListFrame,
+                width=70,
+                height=10,
+                borderwidth=0.5,
+                relief="solid",
+            )
+            taskLabel = tk.Label(taskFrame, text=currTask.taskName, width=45)
+            timeLabel = tk.Label(taskFrame, text=currTask.getLeftTimeStr())
+            currTask.registerLabel(taskLabel, timeLabel)
+
+            taskMenuButton = tk.Menubutton(taskFrame, text="SETTING", relief="groove")
+            taskMenuButton.menu = tk.Menu(taskMenuButton)
+            taskMenuButton.menu.add_command(
+                label="rename",
+                command=lambda label=taskLabel: self.renameTask(label),
+            )
+            taskMenuButton.menu.add_command(
+                label="set time",
+                command=lambda task=currTask: self.setLeftSeconds(task),
+            )
+            taskMenuButton.menu.add_command(
+                label="delete",
+                command=lambda frame=taskFrame, task=currTask: self.deleteTask(frame, task),
+            )
+            startButton = tk.Button(
+                taskFrame, text="START", command=lambda task=currTask: task.startTask()
+            )
+            stopButton = tk.Button(
+                taskFrame, text="STOP", command=lambda task=currTask: task.stopTask()
+            )
+
+            taskFrame.pack(fill=tk.X)
+            taskLabel.pack(side=tk.LEFT)
+            timeLabel.pack(side=tk.LEFT)
+            taskMenuButton.pack(side=tk.LEFT)
+            startButton.pack(side=tk.LEFT)
+            stopButton.pack(side=tk.LEFT)
+            taskMenuButton["menu"] = taskMenuButton.menu
+            taskMenuButton.bind(
+                "<Button-1>",
+                lambda event, menuButton=taskMenuButton: self.menuButtonAction(menuButton),
+            )
 
     def _on_mousewheel(self, event) -> None:
         scrollRegion = self.taskListCanvas.cget("scrollregion")
@@ -196,7 +191,7 @@ class MainWindow(tk.Tk):
         pygame.mixer.music.play()
 
     def editSetting(self):
-        SettingWindow(MainWindow.ROOT)
+        SettingWindow(self)
 
     def renameTask(self, label: tk.Label):
         currentTaskName: str = label.cget("text")
@@ -209,6 +204,17 @@ class MainWindow(tk.Tk):
         currentTask: Task = MainWindow.NAME_TO_TASK_DICT[currentTaskName]
         currentTask.rename(newTaskName)
         label.config(text=newTaskName)
+
+    def setLeftSeconds(self, task: Task):
+        dialog = TaskTimeDialog(
+            windowParent=self.leftSecondsLabel,
+            windowTitle="Task Period Update",
+            initialValueSeconds=Setting.DEFAULT_TASK_TIME,
+        )
+        if dialog.result is None:
+            return
+        task.leftSeconds = dialog.result
+        task.leftSecondsLabel.config(text=task.getLeftTimeStr())
 
     def deleteTask(self, frame: tk.Frame, task: Task) -> None:
         global lastPushedTaskMenuButton
@@ -225,7 +231,7 @@ class MainWindow(tk.Tk):
             tasksJson = TasksJson()
             tasklist = list(MainWindow.NAME_TO_TASK_DICT.values())
             tasksJson.updateTaskList(tasklist)
-            tasksJson.saveRegisteredTasks()
+            # tasksJson.saveRegisteredTasks()
         except Exception as e:
             print(f"MainWindow.saveTasks: {e}")
             messagebox.showerror("ERROR", e)
