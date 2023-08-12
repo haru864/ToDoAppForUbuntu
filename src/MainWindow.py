@@ -75,7 +75,7 @@ class MainWindow(tk.Tk):
         self.taskListCanvas.bind("<Button-5>", self._on_mousewheel)
 
         # 登録済みタスクを読み込み
-        self.setTasksToTaskListFrame()
+        self.addTasksToTaskListFrame()
 
         # メニュー欄を生成
         menuFrame = tk.Frame(self, width=100, height=300, borderwidth=2, relief="solid")
@@ -99,10 +99,9 @@ class MainWindow(tk.Tk):
 
     def addTaskToTasksJson(self) -> None:
         AddTaskWindow(self)
-        self.setTasksToTaskListFrame()
-        self.update()
+        self.addTasksToTaskListFrame()
 
-    def setTasksToTaskListFrame(self) -> None:
+    def addTasksToTaskListFrame(self) -> None:
         for child in self.innerTaskListFrame.winfo_children():
             child.destroy()
 
@@ -128,7 +127,7 @@ class MainWindow(tk.Tk):
             )
             taskMenuButton.menu.add_command(
                 label="set time",
-                command=lambda task=currTask: self.setLeftSeconds(task),
+                command=lambda task=currTask: self.updateTaskTime(task),
             )
             taskMenuButton.menu.add_command(
                 label="delete",
@@ -156,6 +155,7 @@ class MainWindow(tk.Tk):
                     menuButton
                 ),
             )
+            self.update()
 
     def _on_mousewheel(self, event) -> None:
         scrollRegion = self.taskListCanvas.cget("scrollregion")
@@ -201,21 +201,23 @@ class MainWindow(tk.Tk):
             "New Task Name", "Write New Task Name"
         )
         tasksJson = TasksJson()
-        if tasksJson.isRegisteredTaskName(newTaskName) == False:
+        if tasksJson.isRegisteredTaskName(newTaskName) == True:
             messagebox.showerror("ERROR", "This Task Name is already used")
             return
         tasksJson.renameTask(currTaskName=currentTaskName, newTaskName=newTaskName)
         label.config(text=newTaskName)
 
-    def setLeftSeconds(self, task: Task):
+    def updateTaskTime(self, task: Task):
         dialog = TaskTimeDialog(
-            windowParent=self.leftSecondsLabel,
+            windowParent=task.leftSecondsLabel,
             windowTitle="Task Period Update",
-            initialValueSeconds=Setting.DEFAULT_TASK_TIME,
+            initialValueSeconds=task.leftSeconds,
         )
         if dialog.result is None:
             return
         task.leftSeconds = dialog.result
+        tasksJson = TasksJson()
+        tasksJson.updateTaskTime(task.taskName, task.leftSeconds)
         task.leftSecondsLabel.config(text=task.getLeftTimeStr())
 
     def deleteTask(self, frame: tk.Frame, task: Task) -> None:

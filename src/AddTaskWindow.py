@@ -78,7 +78,7 @@ class AddTaskWindow:
         try:
             hoursInt: int = int(self.taskTimeHoursEntry.get())
             minutesInt: int = int(self.taskTimeMinutesEntry.get())
-            secondsInt: int = int(self.taskTimeHoursEntry.get())
+            secondsInt: int = int(self.taskTimeSecondsEntry.get())
             return hoursInt * 3600 + minutesInt * 60 + secondsInt
         except Exception as e:
             print(f"AddTaskWindow.convertToSeconds(): {e}")

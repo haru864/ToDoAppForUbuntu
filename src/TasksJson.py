@@ -35,6 +35,14 @@ class TasksJson:
                 break
         self._saveRegisteredTasks()
 
+    def updateTaskTime(self, targetTaskName: str, newTaskTimeSeconds: int) -> None:
+        self._loadTasksJson()
+        for task in self.registeredTasksList:
+            if task.taskName == targetTaskName:
+                task.leftSeconds = newTaskTimeSeconds
+                break
+        self._saveRegisteredTasks()
+
     def addTaskToTasksJson(self, task: Optional[Task | None]) -> None:
         if task is None:
             return
@@ -74,13 +82,11 @@ class TasksJson:
     def _saveRegisteredTasks(self) -> None:
         try:
             taskInfoDictList: list[dict] = []
-            for cueeTask in self.registeredTasksList:
+            for task in self.registeredTasksList:
                 taskInfoDict: dict = {}
-                taskInfoDict["taskName"] = cueeTask.taskName
-                taskInfoDict["leftSeconds"] = cueeTask.leftSeconds
+                taskInfoDict["taskName"] = task.taskName
+                taskInfoDict["leftSeconds"] = task.leftSeconds
                 taskInfoDictList.append(taskInfoDict)
-            if len(taskInfoDictList) == 0:
-                return
             with open("setting/tasks.json", "w") as taskJson:
                 json.dump(taskInfoDictList, taskJson)
             self.isSynchronizedWithTasksJsonFile = True
