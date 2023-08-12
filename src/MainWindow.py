@@ -25,7 +25,6 @@ USAGE_WINDOW_SIZE: Final[str] = f"{USAGE_WINDOW_WIDTH}x{USAGE_WINDOW_HEIGHT}"
 class MainWindow(tk.Tk):
     TASK_LIST_FRAME_WIDTH: Final[int] = 650
     TASK_LIST_FRAME_HEIGHT: Final[int] = 500
-    NAME_TO_TASK_DICT: dict[str, "Task"] = {}
 
     def __init__(self) -> None:
         super().__init__()
@@ -101,6 +100,7 @@ class MainWindow(tk.Tk):
     def addTaskToTasksJson(self) -> None:
         AddTaskWindow(self)
         self.setTasksToTaskListFrame()
+        self.update()
 
     def setTasksToTaskListFrame(self) -> None:
         for child in self.innerTaskListFrame.winfo_children():
@@ -109,8 +109,6 @@ class MainWindow(tk.Tk):
         tasksJson = TasksJson()
         print(f"loading tasksJson... {tasksJson}")
         for currTask in tasksJson.registeredTasksList:
-            MainWindow.NAME_TO_TASK_DICT[currTask.taskName] = currTask
-
             taskFrame = tk.Frame(
                 self.innerTaskListFrame,
                 width=70,
@@ -134,7 +132,9 @@ class MainWindow(tk.Tk):
             )
             taskMenuButton.menu.add_command(
                 label="delete",
-                command=lambda frame=taskFrame, task=currTask: self.deleteTask(frame, task),
+                command=lambda frame=taskFrame, task=currTask: self.deleteTask(
+                    frame, task
+                ),
             )
             startButton = tk.Button(
                 taskFrame, text="START", command=lambda task=currTask: task.startTask()
@@ -152,7 +152,9 @@ class MainWindow(tk.Tk):
             taskMenuButton["menu"] = taskMenuButton.menu
             taskMenuButton.bind(
                 "<Button-1>",
-                lambda event, menuButton=taskMenuButton: self.menuButtonAction(menuButton),
+                lambda event, menuButton=taskMenuButton: self.menuButtonAction(
+                    menuButton
+                ),
             )
 
     def _on_mousewheel(self, event) -> None:
@@ -198,11 +200,11 @@ class MainWindow(tk.Tk):
         newTaskName: str = simpledialog.askstring(
             "New Task Name", "Write New Task Name"
         )
-        if newTaskName in MainWindow.NAME_TO_TASK_DICT:
+        tasksJson = TasksJson()
+        if tasksJson.isRegisteredTaskName(newTaskName) == False:
             messagebox.showerror("ERROR", "This Task Name is already used")
             return
-        currentTask: Task = MainWindow.NAME_TO_TASK_DICT[currentTaskName]
-        currentTask.rename(newTaskName)
+        tasksJson.renameTask(currTaskName=currentTaskName, newTaskName=newTaskName)
         label.config(text=newTaskName)
 
     def setLeftSeconds(self, task: Task):
@@ -220,26 +222,15 @@ class MainWindow(tk.Tk):
         global lastPushedTaskMenuButton
         frame.destroy()
         lastPushedTaskMenuButton = None
-        MainWindow.NAME_TO_TASK_DICT.pop(task.taskName)
+        tasksJson = TasksJson()
+        tasksJson.deleteTaskFromTasksJson(task.taskName)
 
     def menuButtonAction(self, menuButton: tk.Menubutton) -> None:
         global lastPushedTaskMenuButton
         lastPushedTaskMenuButton = menuButton
 
-    def saveTasks(self) -> None:
-        try:
-            tasksJson = TasksJson()
-            tasklist = list(MainWindow.NAME_TO_TASK_DICT.values())
-            tasksJson.updateTaskList(tasklist)
-            # tasksJson.saveRegisteredTasks()
-        except Exception as e:
-            print(f"MainWindow.saveTasks: {e}")
-            messagebox.showerror("ERROR", e)
-            return
-
     def closeApp(self) -> None:
         print("closing application...")
-        self.saveTasks()
         self.destroy()
 
     def _on_move(self, event=None) -> None:

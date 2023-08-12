@@ -46,8 +46,8 @@ class AddTaskWindow:
         self.buttonClose.grid(row=5, column=1)
 
     def placeWindow(self) -> None:
-        window_width = self.master.winfo_width()
-        window_height = self.master.winfo_height()
+        # window_width = self.master.winfo_width()
+        # window_height = self.master.winfo_height()
         window_x = self.master.winfo_x()
         window_y = self.master.winfo_y()
         # new_window_x = window_x + window_width // 2

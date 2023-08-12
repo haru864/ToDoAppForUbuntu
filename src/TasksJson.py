@@ -8,7 +8,7 @@ class TasksJson:
     def __init__(self) -> None:
         self.registeredTasksList: list[Task] = []
         self.isSynchronizedWithTasksJsonFile: bool = False
-        self.loadTasksJson()
+        self._loadTasksJson()
 
     def getNumOfTasksRegisteredInJson(self) -> int:
         return len(self.registeredTasksList)
@@ -19,20 +19,37 @@ class TasksJson:
                 return True
         return False
 
+    def deleteTaskFromTasksJson(self, taskName: str) -> bool:
+        self._loadTasksJson()
+        for i in range(len(self.registeredTasksList)):
+            if self.registeredTasksList[i].taskName == taskName:
+                del self.registeredTasksList[i]
+                break
+        self._saveRegisteredTasks()
+
+    def renameTask(self, currTaskName: str, newTaskName: str) -> None:
+        self._loadTasksJson()
+        for task in self.registeredTasksList:
+            if task.taskName == currTaskName:
+                task.rename(newTaskName)
+                break
+        self._saveRegisteredTasks()
+
     def addTaskToTasksJson(self, task: Optional[Task | None]) -> None:
         if task is None:
             return
         self.registeredTasksList.append(task)
-        self.saveRegisteredTasks()
-        self.loadTasksJson()
+        self._saveRegisteredTasks()
+        self._loadTasksJson()
 
     def updateTaskList(self, newtasklist: Optional[list[Task] | None]):
         if newtasklist is None:
             return
         self.registeredTasksList = copy.copy(newtasklist)
-        self.saveRegisteredTasks()
+        self._saveRegisteredTasks()
 
-    def loadTasksJson(self) -> None:
+    def _loadTasksJson(self) -> None:
+        self.registeredTasksList.clear()
         data = None
         with open("setting/tasks.json", "r") as taskJson:
             data = json.load(taskJson)
@@ -48,13 +65,13 @@ class TasksJson:
                 )
                 self.registeredTasksList.append(task)
             except Exception as e:
-                print(f"TasksJson.loadTasksJson() -> {e}")
+                print(f"TasksJson._loadTasksJson() -> {e}")
                 self.registeredTasksList = []
                 self.isSynchronizedWithTasksJsonFile = False
                 return
         self.isSynchronizedWithTasksJsonFile = True
 
-    def saveRegisteredTasks(self) -> None:
+    def _saveRegisteredTasks(self) -> None:
         try:
             taskInfoDictList: list[dict] = []
             for cueeTask in self.registeredTasksList:
@@ -68,7 +85,7 @@ class TasksJson:
                 json.dump(taskInfoDictList, taskJson)
             self.isSynchronizedWithTasksJsonFile = True
         except Exception as e:
-            print(f"TasksJson.saveRegisteredTasks() -> {e}")
+            print(f"TasksJson._saveRegisteredTasks() -> {e}")
             raise e
 
     def __str__(self) -> str:
