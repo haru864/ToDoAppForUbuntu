@@ -6,8 +6,8 @@ from TasksJson import TasksJson
 from tkinter import simpledialog
 from Task import Task
 from tkinter import messagebox
-from SettingWindow import SettingWindow
-from Setting import Setting
+from SettingDialog import SettingDialog
+from SettingJson import SettingJson
 from AddTaskDialog import AddTaskDialog
 
 usageWindow = None
@@ -188,11 +188,11 @@ class MainWindow(tk.Tk):
 
     def listenSound(self) -> None:
         pygame.init()
-        pygame.mixer.music.load(Setting.SOUND_FILE)
+        pygame.mixer.music.load(SettingJson.sound_file)
         pygame.mixer.music.play()
 
     def editSetting(self):
-        SettingWindow(self)
+        SettingDialog(self)
 
     def renameTask(self, label: tk.Label):
         currentTaskName: str = label.cget("text")

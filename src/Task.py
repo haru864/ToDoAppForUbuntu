@@ -3,7 +3,7 @@ import pygame
 import time
 import threading
 from typing import Optional
-from Setting import Setting
+from SettingJson import SettingJson
 
 
 class Task:
@@ -62,11 +62,11 @@ class Task:
 
     def beep(self):
         pygame.init()
-        pygame.mixer.music.load(Setting.SOUND_FILE)
+        pygame.mixer.music.load(SettingJson.sound_file)
         start_time = time.time()
         while self.isBeeping:
             elapsed_time = time.time() - start_time
-            if elapsed_time >= Setting.BEEP_PERIOD_SECONDS:
+            if elapsed_time >= SettingJson.beep_period_seconds:
                 pygame.mixer.music.stop()
                 break
             while pygame.mixer.music.get_busy():

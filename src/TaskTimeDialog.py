@@ -48,5 +48,8 @@ class TaskTimeDialog(simpledialog.Dialog):
             messagebox.showerror("ERROR", "hours:0~24, minutes:0~59, seconds:0~59")
             return 0
 
+    def apply(self) -> None:
+        return super().apply()
+
     def __timeToSeconds(self, hours, minutes, seconds) -> int:
         return hours * 3600 + minutes * 60 + seconds

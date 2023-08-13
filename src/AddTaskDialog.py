@@ -2,8 +2,9 @@ import tkinter as tk
 from typing import Optional
 from Task import Task
 from TasksJson import TasksJson
-from Setting import Setting
 from tkinter import simpledialog, messagebox
+from SettingJson import SettingJson
+import inspect
 
 
 class AddTaskDialog(simpledialog.Dialog):
@@ -40,14 +41,17 @@ class AddTaskDialog(simpledialog.Dialog):
             leftSeconds: int = self._convertToSeconds()
             self.task = Task(taskName, leftSeconds)
             tasksJson = TasksJson()
-            if tasksJson.getNumOfTasksRegisteredInJson() + 1 > Setting.MAX_NUM_OF_TASKS:
+            if (
+                tasksJson.getNumOfTasksRegisteredInJson() + 1
+                > SettingJson.max_num_of_tasks
+            ):
                 raise Exception("Cannot register any more tasks")
             if tasksJson.isRegisteredTaskName(self.task.taskName) == True:
                 raise Exception("This task name is already used")
             tasksJson.addTaskToTasksJson(self.task)
             return True
         except Exception as e:
-            print(f"AddTaskWindow.addTask(): {e}")
+            print(f"{self.__class__}.{inspect.currentframe().f_code.co_name}: {e}")
             messagebox.showerror("ERROR", str(e))
             return False
 
@@ -61,6 +65,6 @@ class AddTaskDialog(simpledialog.Dialog):
             secondsInt: int = int(self.taskTimeSecondsEntry.get())
             return hoursInt * 3600 + minutesInt * 60 + secondsInt
         except Exception as e:
-            print(f"AddTaskWindow._convertToSeconds(): {e}")
-            messagebox.showinfo("ERROR", str(e))
+            print(f"{self.__class__}.{inspect.currentframe().f_code.co_name}: {e}")
+            messagebox.showerror("ERROR", str(e))
             return None

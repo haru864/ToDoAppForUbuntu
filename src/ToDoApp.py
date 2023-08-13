@@ -1,6 +1,5 @@
 from MainWindow import MainWindow
-from ConfJson import ConfJson
-from Setting import Setting
+from SettingJson import SettingJson
 
 
 def centerWindow(window) -> None:
@@ -14,12 +13,7 @@ def centerWindow(window) -> None:
 
 def main():
     # 設定ファイル読み込み
-    confJson = ConfJson()
-    Setting.updateSetting(
-        newMaxNumOfTasks=confJson.max_num_of_tasks,
-        newBeepPeriodSeconds=confJson.beep_period_seconds,
-        newSoundFile=confJson.sound_file,
-    )
+    SettingJson.loadSettingJson()
 
     # メインウィンドウを生成
     mainWIndow = MainWindow()
