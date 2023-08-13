@@ -2,7 +2,10 @@
 
 修正リスト
 ・タスク追加したときに画面にすぐ反映されなくて、"add task"を押すと反映される【実装中】
-　　-> "add task"以外のボタンだと反映されない
+　　self.addTasksToTaskListFrame()が実行されることで反映される。
+　　AddTaskWindowはウィンドウを表示して終わりなので、ウィンドウの入力値を
+　　JSONをファイルに書き出すのは、self.addTasksToTaskListFrame()が
+　　実行された後になるので、登録内容が反映されない。
 
 ・登録済みのタスク数に関係なく最大タスク数を設定できてしまう
 ・Setting、ConfJson周りが冗長なのでクラス設計を見直して、ConfJsonに統一する

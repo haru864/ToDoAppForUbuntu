@@ -8,7 +8,7 @@ from Task import Task
 from tkinter import messagebox
 from SettingWindow import SettingWindow
 from Setting import Setting
-from AddTaskWindow import AddTaskWindow
+from AddTaskDialog import AddTaskDialog
 
 usageWindow = None
 lastPushedTaskMenuButton: tk.Menubutton = None
@@ -75,7 +75,7 @@ class MainWindow(tk.Tk):
         self.taskListCanvas.bind("<Button-5>", self._on_mousewheel)
 
         # 登録済みタスクを読み込み
-        self.addTasksToTaskListFrame()
+        self.updateTaskListFrame()
 
         # メニュー欄を生成
         menuFrame = tk.Frame(self, width=100, height=300, borderwidth=2, relief="solid")
@@ -98,10 +98,10 @@ class MainWindow(tk.Tk):
         closeButton.pack(side=tk.TOP, padx=5, pady=10)
 
     def addTaskToTasksJson(self) -> None:
-        AddTaskWindow(self)
-        self.addTasksToTaskListFrame()
+        AddTaskDialog(self)
+        self.updateTaskListFrame()
 
-    def addTasksToTaskListFrame(self) -> None:
+    def updateTaskListFrame(self) -> None:
         for child in self.innerTaskListFrame.winfo_children():
             child.destroy()
 
@@ -155,7 +155,6 @@ class MainWindow(tk.Tk):
                     menuButton
                 ),
             )
-            self.update()
 
     def _on_mousewheel(self, event) -> None:
         scrollRegion = self.taskListCanvas.cget("scrollregion")
