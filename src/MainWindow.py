@@ -75,7 +75,7 @@ class MainWindow(tk.Tk):
         self.taskListCanvas.bind("<Button-5>", self._on_mousewheel)
 
         # 登録済みタスクを読み込み
-        self.updateTaskListFrame()
+        self.setTaskListFrame()
 
         # メニュー欄を生成
         menuFrame = tk.Frame(self, width=100, height=300, borderwidth=2, relief="solid")
@@ -99,9 +99,9 @@ class MainWindow(tk.Tk):
 
     def addTaskToTasksJson(self) -> None:
         AddTaskDialog(self)
-        self.updateTaskListFrame()
+        self.setTaskListFrame()
 
-    def updateTaskListFrame(self) -> None:
+    def setTaskListFrame(self) -> None:
         for child in self.innerTaskListFrame.winfo_children():
             child.destroy()
 
@@ -136,10 +136,14 @@ class MainWindow(tk.Tk):
                 ),
             )
             startButton = tk.Button(
-                taskFrame, text="START", command=lambda task=currTask: task.startTask()
+                taskFrame,
+                text="START",
+                command=lambda task=currTask: self.startTask(task),
             )
             stopButton = tk.Button(
-                taskFrame, text="STOP", command=lambda task=currTask: task.stopTask()
+                taskFrame,
+                text="STOP",
+                command=lambda task=currTask: self.stopTask(task),
             )
 
             taskFrame.pack(fill=tk.X)
@@ -167,6 +171,16 @@ class MainWindow(tk.Tk):
                 self.taskListCanvas.yview_scroll(-1, "units")
             elif event.num == 5:
                 self.taskListCanvas.yview_scroll(1, "units")
+
+    def startTask(self, task: Task):
+        task.start()
+
+    def stopTask(self, task: Task):
+        task.stop()
+        tasksJson = TasksJson()
+        tasksJson.updateTaskTime(
+            targetTaskName=task.taskName, newTaskTimeSeconds=task.leftSeconds
+        )
 
     def displayUsage(self) -> None:
         global usageWindow

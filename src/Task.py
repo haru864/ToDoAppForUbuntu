@@ -43,11 +43,11 @@ class Task:
     def rename(self, newTaskName: str) -> None:
         self.taskName = newTaskName
 
-    def startTask(self):
+    def start(self):
         self.isTimerRunning = True
         self.decrementTime()
 
-    def stopTask(self):
+    def stop(self):
         self.isTimerRunning = False
         self.stopBeep()
 

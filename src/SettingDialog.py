@@ -3,6 +3,7 @@ from tkinter import filedialog
 from SettingJson import SettingJson
 from tkinter import simpledialog, messagebox
 import inspect
+from TasksJson import TasksJson
 
 
 class SettingDialog(simpledialog.Dialog):
@@ -54,6 +55,12 @@ class SettingDialog(simpledialog.Dialog):
             self.max_num_of_tasks: int = int(self.entryMaxNumOfTasks.get())
             self.beep_period_seconds: int = int(self.entryBeepPeriodSeconds.get())
             self.sound_file: str = self.labelSoundFile.cget("text")
+            tasksJson = TasksJson()
+            numOfRegisteredTasks: int = tasksJson.getNumOfTasksRegisteredInJson()
+            if self.max_num_of_tasks < numOfRegisteredTasks:
+                raise Exception(
+                    f"MAX_NUM_OF_TASKS must be more than the number of tasks already registered ({numOfRegisteredTasks})"
+                )
             return True
         except Exception as e:
             print(f"{self.__class__}.{inspect.currentframe().f_code.co_name}: {e}")
