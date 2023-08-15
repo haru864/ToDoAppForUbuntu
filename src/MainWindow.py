@@ -98,6 +98,14 @@ class MainWindow(tk.Tk):
         closeButton.pack(side=tk.TOP, padx=5, pady=10)
 
     def addTaskToTasksJson(self) -> None:
+        tasksJson = TasksJson()
+        SettingJson.loadSettingJson()
+        if tasksJson.getNumOfTasksRegisteredInJson() == SettingJson.max_num_of_tasks:
+            messagebox.showinfo(
+                "INFO",
+                "The maximum number of tasks that can be registered has been reached",
+            )
+            return
         AddTaskDialog(self)
         self.setTaskListFrame()
 
