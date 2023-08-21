@@ -9,6 +9,7 @@ from tkinter import messagebox
 from SettingDialog import SettingDialog
 from SettingJson import SettingJson
 from AddTaskDialog import AddTaskDialog
+from TaskTypeWindow import TaskTypeWindow
 
 usageWindow = None
 lastPushedTaskMenuButton: tk.Menubutton = None
@@ -90,11 +91,15 @@ class MainWindow(tk.Tk):
             menuFrame, text="listen sound", command=self.listenSound
         )
         settingButton = tk.Button(menuFrame, text="setting", command=self.editSetting)
+        taskTypeButton = tk.Button(
+            menuFrame, text="task type", command=self.editTaskType
+        )
         closeButton = tk.Button(menuFrame, text="close", command=self.closeApp)
         addTaskButton.pack(side=tk.TOP, padx=5, pady=10)
         usageButton.pack(side=tk.TOP, padx=5, pady=10)
         listenSoundButton.pack(side=tk.TOP, padx=5, pady=10)
         settingButton.pack(side=tk.TOP, padx=5, pady=10)
+        taskTypeButton.pack(side=tk.TOP, padx=5, pady=10)
         closeButton.pack(side=tk.TOP, padx=5, pady=10)
 
     def addTaskToTasksJson(self) -> None:
@@ -179,6 +184,9 @@ class MainWindow(tk.Tk):
                 self.taskListCanvas.yview_scroll(-1, "units")
             elif event.num == 5:
                 self.taskListCanvas.yview_scroll(1, "units")
+
+    def editTaskType(self):
+        TaskTypeWindow(self)
 
     def startTask(self, task: Task):
         task.start()

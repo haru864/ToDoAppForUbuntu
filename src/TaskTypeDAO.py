@@ -12,7 +12,7 @@ class TaskTypeDAO:
     def selectAll(self) -> list[TaskType]:
         with self.connection as conn:
             cursor = conn.cursor()
-            sql: str = "SELECT * FROM task_type"
+            sql: str = "SELECT * FROM task_type ORDER BY task_type_id"
             cursor.execute(sql)
             return [TaskType(*row) for row in cursor.fetchall()]
 
@@ -33,9 +33,7 @@ class TaskTypeDAO:
     ) -> Optional[TaskType]:
         with self.connection as conn:
             cursor = conn.cursor()
-            sql: str = (
-                "UPDATE task_type SET task_type_name = ? WHERE task_type_id = ?"
-            )
+            sql: str = "UPDATE task_type SET task_type_name = ? WHERE task_type_id = ?"
             data = [newTaskTypeName, currTaskType.task_type_id]
             cursor.execute(sql, data)
             self.connection.commit()
