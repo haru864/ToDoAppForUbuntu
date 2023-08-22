@@ -21,7 +21,9 @@ GUI lib: Tkinter
     実行時間(過去に同じ種別、難易度のタスクをどれくらい経験したか)
         秒単位で記録
 
+
 # todo.db
+
 task_info
 タスク名        TEXT        PK
 登録日時(UT)    TEXT        PK
@@ -31,23 +33,8 @@ task_info
 総経過時間(秒)  INTEGER
 残り時間        INTEGER
 
-CREATE TABLE task_info (
-    task_name TEXT,
-    registered_at TEXT,
-    task_type_id INTEGER,
-    is_completed INTEGER,
-    difficulty INTEGER,
-    total_elapsed_time_seconds INTEGER,
-    remaining_time_seconds INTEGER,
-    PRIMARY KEY (task_name, registered_at, task_type_id),
-    FOREIGN KEY (task_type_id) REFERENCES task_type(task_type_id) ON DELETE CASCADE
-);
-
 task_type
 タイプID    INTGER  PK
 タイプ名    TEXT    UNIQUE
 
-CREATE TABLE task_type (
-    task_type_id INTEGER PRIMARY KEY,
-    task_type_name TEXT UNIQUE
-);
+

@@ -11,21 +11,57 @@ class TaskTypeWindow:
         x = master.winfo_x()
         y = master.winfo_y()
         self.window.geometry(f"+{x}+{y}")
+        self.taskTypeDAO = TaskTypeDAO("db/todo.db")
+        self.displayContents()
 
-        taskTypeDAO = TaskTypeDAO("db/todo.db")
-        self.registeredTaskTypeList = taskTypeDAO.selectAll()
-        print(self.registeredTaskTypeList)
+    def displayContents(self):
+        self.registeredTaskTypeList = self.taskTypeDAO.selectAll()
+        # print(self.registeredTaskTypeList)
 
         tk.Label(self.window, text="No").grid(row=0, column=0, padx=10, pady=5)
         tk.Label(self.window, text="Task Type").grid(row=0, column=1, padx=10, pady=5)
+        self.numberToTaskType = {}
 
         for index, taskType in enumerate(self.registeredTaskTypeList):
             # print(str(index + 1) + ", " + taskType.task_type_name)
             task_type_name_var = tk.StringVar()
             task_type_name_var.set(taskType.task_type_name)
+            itemNumber = index + 1
             tk.Label(master=self.window, text=index + 1).grid(
-                row=index + 1, column=0, padx=10, pady=5
+                row=itemNumber, column=0, padx=10, pady=5
             )
             tk.Entry(master=self.window, textvariable=task_type_name_var).grid(
-                row=index + 1, column=1, padx=10, pady=5
+                row=itemNumber, column=1, padx=10, pady=5
             )
+            tk.Button(
+                master=self.window,
+                text="Delete",
+                command=lambda itemNumber=itemNumber: self.deleteTaskType(itemNumber),
+            ).grid(row=itemNumber, column=2, padx=10, pady=5)
+            self.numberToTaskType[itemNumber] = taskType
+
+        tk.Button(master=self.window, text="Add Type", command=self.addTaskType).grid(
+            row=21, column=0, padx=10, pady=5
+        )
+        tk.Button(master=self.window, text="Save", command=self.save).grid(
+            row=21, column=1, padx=10, pady=5
+        )
+        tk.Button(master=self.window, text="Close", command=self.close).grid(
+            row=21, column=2, padx=10, pady=5
+        )
+
+    def deleteTaskType(self, itemNumber: int):
+        # print(itemNumber)
+        self.taskTypeDAO.deleteTaskType(self.numberToTaskType[itemNumber])
+        for child in self.window.winfo_children():
+            child.destroy()
+        self.displayContents()
+
+    def addTaskType(self):
+        pass
+
+    def save(self):
+        pass
+
+    def close(self):
+        self.window.destroy()
