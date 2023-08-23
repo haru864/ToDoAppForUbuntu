@@ -1,6 +1,7 @@
 import tkinter as tk
 from TaskType import TaskType
 from TaskTypeDAO import TaskTypeDAO
+from TaskTypeDialog import TaskTypeDialog
 
 
 class TaskTypeWindow:
@@ -15,12 +16,15 @@ class TaskTypeWindow:
         self.displayContents()
 
     def displayContents(self):
+        for child in self.window.winfo_children():
+            child.destroy()
+
         self.registeredTaskTypeList = self.taskTypeDAO.selectAll()
         # print(self.registeredTaskTypeList)
 
         tk.Label(self.window, text="No").grid(row=0, column=0, padx=10, pady=5)
         tk.Label(self.window, text="Task Type").grid(row=0, column=1, padx=10, pady=5)
-        self.numberToTaskType = {}
+        self.numberToTaskType: dict[int, TaskType] = {}
 
         for index, taskType in enumerate(self.registeredTaskTypeList):
             # print(str(index + 1) + ", " + taskType.task_type_name)
@@ -43,7 +47,7 @@ class TaskTypeWindow:
         tk.Button(master=self.window, text="Add Type", command=self.addTaskType).grid(
             row=21, column=0, padx=10, pady=5
         )
-        tk.Button(master=self.window, text="Save", command=self.save).grid(
+        tk.Button(master=self.window, text="Save Name Change", command=self.save).grid(
             row=21, column=1, padx=10, pady=5
         )
         tk.Button(master=self.window, text="Close", command=self.close).grid(
@@ -51,14 +55,14 @@ class TaskTypeWindow:
         )
 
     def deleteTaskType(self, itemNumber: int):
-        # print(itemNumber)
-        self.taskTypeDAO.deleteTaskType(self.numberToTaskType[itemNumber])
-        for child in self.window.winfo_children():
-            child.destroy()
+        self.taskTypeDAO.deleteTaskType(
+            self.numberToTaskType[itemNumber].task_type_name
+        )
         self.displayContents()
 
     def addTaskType(self):
-        pass
+        TaskTypeDialog(self.window)
+        self.displayContents()
 
     def save(self):
         pass
