@@ -34,25 +34,35 @@ class TaskTypeWindow:
             tk.Label(master=self.window, text=index + 1).grid(
                 row=itemNumber, column=0, padx=10, pady=5
             )
-            tk.Entry(master=self.window, textvariable=task_type_name_var).grid(
+            tk.Label(master=self.window, textvariable=task_type_name_var).grid(
                 row=itemNumber, column=1, padx=10, pady=5
             )
             tk.Button(
                 master=self.window,
+                text="Edit",
+                command=lambda itemNumber=itemNumber: self.editTaskType(itemNumber),
+            ).grid(row=itemNumber, column=2, padx=10, pady=5)
+            tk.Button(
+                master=self.window,
                 text="Delete",
                 command=lambda itemNumber=itemNumber: self.deleteTaskType(itemNumber),
-            ).grid(row=itemNumber, column=2, padx=10, pady=5)
+            ).grid(row=itemNumber, column=3, padx=10, pady=5)
             self.numberToTaskType[itemNumber] = taskType
 
         tk.Button(master=self.window, text="Add Type", command=self.addTaskType).grid(
-            row=21, column=0, padx=10, pady=5
-        )
-        tk.Button(master=self.window, text="Save Name Change", command=self.save).grid(
             row=21, column=1, padx=10, pady=5
         )
         tk.Button(master=self.window, text="Close", command=self.close).grid(
             row=21, column=2, padx=10, pady=5
         )
+
+    def editTaskType(self, itemNumber: int):
+        TaskTypeDialog(
+            master=self.window,
+            mode=TaskTypeDialog.EDIT_MODE,
+            currentTaskTypeName=self.numberToTaskType[itemNumber].task_type_name,
+        )
+        self.displayContents()
 
     def deleteTaskType(self, itemNumber: int):
         self.taskTypeDAO.deleteTaskType(
@@ -61,7 +71,7 @@ class TaskTypeWindow:
         self.displayContents()
 
     def addTaskType(self):
-        TaskTypeDialog(self.window)
+        TaskTypeDialog(master=self.window, mode=TaskTypeDialog.ADD_MODE)
         self.displayContents()
 
     def save(self):
