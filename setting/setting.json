@@ -1,1 +1,5 @@
-{"max_num_of_tasks": 3, "beep_period_seconds": 5, "sound_file": "/home/haru/project/ToDoApp/sound/bark.ogg"}
+{
+    "width": 400,
+    "height": 300,
+    "port": 10010
+}
