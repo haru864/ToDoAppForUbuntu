@@ -1,6 +1,16 @@
+var timers = {};
+
 document.getElementById('addTask').addEventListener('click', function () {
     var taskName = document.getElementById('taskName').value;
     var taskTime = document.getElementById('taskTime').value;
+    if (isRegisteredTask(taskName) === true) {
+        alert('すでに登録されているタスクは追加できません。')
+        return;
+    }
+    if (isValidTime(taskTime) === false) {
+        alert('タスクの時間は1分以上で設定してください。')
+        return;
+    }
     addTask(taskName, taskTime);
 });
 
@@ -11,17 +21,36 @@ function addTask(name, time) {
     list.appendChild(task);
 }
 
-var timers = {};
+function isRegisteredTask(name) {
+    if (document.getElementById(`time-${name}`)) {
+        return true;
+    }
+    return false;
+}
 
-function toggleTimer(btn, taskId, time) {
-    if (timers[taskId]) {
-        clearInterval(timers[taskId].interval);
-        delete timers[taskId];
+function isValidTime(time) {
+    if (time <= 0) {
+        return false;
+    }
+    return true;
+}
+
+function formatTime(minutes) {
+    var h = Math.floor(minutes / 60);
+    var m = Math.floor(minutes % 60);
+    var s = Math.floor((minutes - Math.floor(minutes)) * 60);
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function toggleTimer(btn, name, time) {
+    if (timers[name]) {
+        clearInterval(timers[name].interval);
+        delete timers[name];
         btn.innerText = 'スタート';
     } else {
-        timers[taskId] = {
+        timers[name] = {
             remaining: time * 60, interval: setInterval(function () {
-                updateTimer(taskId);
+                updateTimer(name);
             }, 1000)
         };
         btn.innerText = '停止';
@@ -36,13 +65,6 @@ function updateTimer(taskId) {
     } else {
         document.getElementById('time-' + taskId).innerText = formatTime(timer.remaining / 60);
     }
-}
-
-function formatTime(minutes) {
-    var h = Math.floor(minutes / 60);
-    var m = Math.floor(minutes % 60);
-    var s = Math.floor((minutes - Math.floor(minutes)) * 60);
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
 function deleteTask(btn, taskId) {
