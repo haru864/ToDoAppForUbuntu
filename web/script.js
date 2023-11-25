@@ -1,5 +1,9 @@
 var timers = {};
 
+document.getElementById('selectSound').addEventListener('click', function () {
+    eel.selectSound();
+});
+
 document.getElementById('addTask').addEventListener('click', function () {
     var taskName = document.getElementById('taskName').value;
     var taskTime = document.getElementById('taskTime').value;
