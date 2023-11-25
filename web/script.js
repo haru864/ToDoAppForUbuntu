@@ -45,7 +45,7 @@ function formatTime(minutes) {
 function toggleTimer(btn, name, time) {
     if (timers[name]) {
         clearInterval(timers[name].interval);
-        delete timers[name];
+        // delete timers[name];
         btn.innerText = 'スタート';
     } else {
         timers[name] = {
@@ -57,20 +57,23 @@ function toggleTimer(btn, name, time) {
     }
 }
 
-function updateTimer(taskId) {
-    var timer = timers[taskId];
+function updateTimer(taskName) {
+    var timer = timers[taskName];
     if (--timer.remaining <= 0) {
         clearInterval(timer.interval);
-        alert(taskId + 'の時間です！');
+        eel.startSound();
+        alert(taskName + 'の終了時間です！');
+        eel.stopSound();
     } else {
-        document.getElementById('time-' + taskId).innerText = formatTime(timer.remaining / 60);
+        document.getElementById('time-' + taskName).innerText = formatTime(timer.remaining / 60);
     }
 }
 
-function deleteTask(btn, taskId) {
+function deleteTask(btn, taskName) {
     var li = btn.parentNode;
-    if (timers[taskId]) {
-        clearInterval(timers[taskId].interval);
+    if (timers[taskName]) {
+        clearInterval(timers[taskName].interval);
+        delete timers[taskName];
     }
     li.parentNode.removeChild(li);
 }
