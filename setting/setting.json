@@ -1,5 +1,6 @@
 {
     "width": 1000,
     "height": 600,
-    "port": 10010
+    "port": 10010,
+    "sound": "sound/drip.ogg"
 }

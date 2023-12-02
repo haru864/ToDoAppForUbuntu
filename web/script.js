@@ -15,7 +15,7 @@ var timers = {};
 listRegisteredTask();
 
 document.getElementById('select_sound').addEventListener('click', function () {
-    eel.select_sound();
+    eel.selectSound();
 });
 
 document.getElementById('add_task').addEventListener('click', function () {

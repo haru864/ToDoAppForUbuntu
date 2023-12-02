@@ -11,36 +11,34 @@ import sqlite3
 
 DB_PATH: str = "db/todo.db"
 SETTING_FILE_RELATIVE_PATH: str = "setting/setting.json"
-SOUND_FILE_PATH: str = "sound/bark.ogg"
 SUPPORTED_SOUND_FILE_FORMATS: list[str] = [".ogg", ".mp3"]
 
 with open("setting/setting.json", "r") as setting_file:
     setting_data: dict[str, Any] = json.load(setting_file)
-    window_width: int = setting_data["width"]
-    window_height: int = setting_data["height"]
-    port: int = setting_data["port"]
 
 eel.init("web", allowed_extensions=[".js", ".html"])
 
 
 @eel.expose
 def selectSound() -> None:
-    global SOUND_FILE_PATH
     root = tkinter.Tk()
     root.withdraw()
     while file_path := filedialog.askopenfilename():
         _, file_extension = os.path.splitext(file_path)
-        if file_extension in SUPPORTED_SOUND_FILE_FORMATS:
-            SOUND_FILE_PATH = file_path
-            break
-        messagebox.showerror("エラー", "選択可能なファイルは.oogまたは.mp3です。")
+        if file_extension not in SUPPORTED_SOUND_FILE_FORMATS:
+            messagebox.showerror("エラー", "選択可能なファイルは.oogまたは.mp3です。")
+            continue
+        with open("setting/setting.json", "w") as f:
+            setting_data["sound"] = file_path
+            f.write(json.dumps(setting_data))
+        break
     return None
 
 
 @eel.expose
 def startSound() -> None:
     pygame.init()
-    pygame.mixer.music.load(SOUND_FILE_PATH)
+    pygame.mixer.music.load(setting_data["sound"])
     pygame.mixer.music.play(-1)
     return None
 
@@ -96,4 +94,8 @@ def dict_factory(cursor, row):
     return {key: value for key, value in zip(fields, row)}
 
 
-eel.start("index.html", size=(window_width, window_height), port=port)
+eel.start(
+    "index.html",
+    size=(setting_data["width"], setting_data["height"]),
+    port=setting_data["port"],
+)
