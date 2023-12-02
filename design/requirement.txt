@@ -8,8 +8,6 @@
 
 アイコンからアプリを起動できるようにする。
 
-language: Python
-GUI lib: Tkinter
 
 # タスク時間の予測
 重回帰分析を使う
@@ -17,24 +15,19 @@ GUI lib: Tkinter
     タスク実行時間
 説明変数：
     難易度
-        1~10段階で記録
+        5段階で記録
     実行時間(過去に同じ種別、難易度のタスクをどれくらい経験したか)
         秒単位で記録
 
 
-# todo.db
-
-task_info
-タスク名        TEXT        PK
-登録日時(UT)    TEXT        PK
-タイプID        INTEGER     PK, 外部参照
-完了フラグ      INTEGER
+# タスク追加時にレコード登録
+<task_info>
+ID             INTEGER  PK
+タスク名        TEXT
+タスク種別      INTEGER
 難易度          INTEGER
-総経過時間(秒)  INTEGER
-残り時間        INTEGER
-
-task_type
-タイプID    INTGER  PK
-タイプ名    TEXT    UNIQUE
-
+完了フラグ      INTEGER
+見積もり(秒)    INTEGER
+残り時間(秒)    INTEGER
+経過時間(秒)    INTEGER
 

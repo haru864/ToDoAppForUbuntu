@@ -1,17 +1,10 @@
 CREATE TABLE task_info (
+    id INTEGER PRIMARY KEY,
     task_name TEXT,
-    registered_at TEXT,
-    task_type_id INTEGER,
-    is_completed INTEGER,
-    difficulty INTEGER,
-    total_elapsed_time_seconds INTEGER,
+    task_type TEXT,
+    difficulty_level INTEGER,
+    is_completed INTEGER CHECK(is_completed IN (0, 1)),
+    estimated_time_seconds INTEGER,
     remaining_time_seconds INTEGER,
-    PRIMARY KEY (task_name, registered_at, task_type_id),
-    FOREIGN KEY (task_type_id) REFERENCES task_type(task_type_id) ON DELETE CASCADE
+    total_elapsed_time_seconds INTEGER
 );
-
-CREATE TABLE task_type (
-    task_type_id INTEGER PRIMARY KEY,
-    task_type_name TEXT UNIQUE
-);
-

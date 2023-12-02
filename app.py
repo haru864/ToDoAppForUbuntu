@@ -6,7 +6,10 @@ import pygame
 import tkinter
 from tkinter import filedialog
 from tkinter import messagebox
+import sqlite3
 
+
+DB_PATH: str = "db/todo.db"
 SETTING_FILE_RELATIVE_PATH: str = "setting/setting.json"
 SOUND_FILE_PATH: str = "sound/bark.ogg"
 SUPPORTED_SOUND_FILE_FORMATS: list[str] = [".ogg", ".mp3"]
@@ -46,6 +49,51 @@ def startSound() -> None:
 def stopSound() -> None:
     pygame.mixer.music.stop()
     return None
+
+
+@eel.expose
+def registerTask(
+    task_name: str,
+    task_type: str,
+    difficulty_level: int,
+    is_completed: int,
+    estimated_time_seconds: int,
+    remaining_time_seconds: int,
+    total_elapsed_time_seconds: int,
+) -> int | None:
+    data: dict[str, Any] = {
+        "task_name": task_name,
+        "task_type": task_type,
+        "difficulty_level": difficulty_level,
+        "is_completed": is_completed,
+        "estimated_time_seconds": estimated_time_seconds,
+        "remaining_time_seconds": remaining_time_seconds,
+        "total_elapsed_time_seconds": total_elapsed_time_seconds,
+    }
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor: sqlite3.Cursor = conn.cursor()
+        sql: str = "INSERT INTO task_info (task_name, task_type, difficulty_level, is_completed, estimated_time_seconds, remaining_time_seconds, total_elapsed_time_seconds) VALUES (:task_name, :task_type, :difficulty_level, :is_completed, :estimated_time_seconds, :remaining_time_seconds, :total_elapsed_time_seconds)"
+        cursor.execute(sql, data)
+        conn.commit()
+        inserted_id: int | None = cursor.lastrowid
+    return inserted_id
+
+
+@eel.expose
+def getRegisteredTask() -> str:
+    sql: str = "SELECT * FROM task_info WHERE is_completed = 0"
+    query_result: list[Any] = None
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = dict_factory
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute(sql)
+        query_result = cursor.fetchall()
+    return json.dumps(query_result)
+
+
+def dict_factory(cursor, row):
+    fields = [column[0] for column in cursor.description]
+    return {key: value for key, value in zip(fields, row)}
 
 
 eel.start("index.html", size=(window_width, window_height), port=port)

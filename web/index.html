@@ -9,14 +9,27 @@
 <body>
     <h1>TODOアプリ</h1>
     <div>
-        <button id="selectSound">サウンドを選択</button>
+        <button id="select_sound">サウンドを選択</button>
     </div>
+    <!-- TODO タスクをDBに登録、起動時に表示できるようになったら実装する -->
+    <!-- <div>
+        <button id="showTaskType">これまでに登録したタスク種別</button>
+    </div> -->
     <div>
-        <input type="text" id="taskName" placeholder="タスク名">
-        <input type="number" id="taskTime" placeholder="時間 (分)">
-        <button id="addTask">タスク追加</button>
+        <input type="text" id="task_name" placeholder="タスク名">
+        <input type="text" id="task_type" placeholder="タスク種別">
+        <select id="difficulty_level" required>
+            <option value="">難易度を選択してください</option>
+            <option value="1">かなり易しい(1)</option>
+            <option value="2">易しい(2)</option>
+            <option value="3">普通(3)</option>
+            <option value="4">難しい(4)</option>
+            <option value="5">かなり難しい(5)</option>
+        </select>
+        <input type="number" id="task_time" placeholder="時間(分)">
+        <button id="add_task">タスク追加</button>
     </div>
-    <ul id="taskList"></ul>
+    <ul id="task_list"></ul>
     <script src="script.js"></script>
 </body>
 
