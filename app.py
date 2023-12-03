@@ -89,6 +89,24 @@ def getRegisteredTask() -> str:
     return json.dumps(query_result)
 
 
+@eel.expose
+def setCompleteFlagOnTask(task_id: int) -> None:
+    sql: str = "UPDATE task_info SET is_completed = 1 WHERE id = ?"
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute(sql, (task_id,))
+    return None
+
+
+@eel.expose
+def deleteRegisteredTask(task_id: int) -> None:
+    sql: str = "DELETE FROM task_info WHERE id = ?"
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute(sql, (task_id,))
+    return None
+
+
 def dict_factory(cursor, row):
     fields = [column[0] for column in cursor.description]
     return {key: value for key, value in zip(fields, row)}

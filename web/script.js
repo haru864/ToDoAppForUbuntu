@@ -66,8 +66,14 @@ function formatTime(minutes) {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-function completeTask(task_id) {
-    return;
+function completeTask(btn, task_id) {
+    eel.setCompleteFlagOnTask(task_id);
+    var li = btn.parentNode;
+    if (timers[task_id]) {
+        clearInterval(timers[task_id].interval);
+        delete timers[task_id];
+    }
+    li.parentNode.removeChild(li);
 }
 
 function toggleTimer(btn, task_id, time) {
@@ -98,6 +104,7 @@ function updateTimer(task_id) {
 }
 
 function deleteTask(btn, task_id) {
+    eel.deleteRegisteredTask(task_id);
     var li = btn.parentNode;
     if (timers[task_id]) {
         clearInterval(timers[task_id].interval);
