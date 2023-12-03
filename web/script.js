@@ -22,7 +22,7 @@ document.getElementById('add_task').addEventListener('click', function () {
     var task_name = document.getElementById('task_name').value;
     var task_type = document.getElementById('task_type').value;
     var difficulty_level = document.getElementById('difficulty_level').value;
-    var task_time = document.getElementById('task_time').value;
+    var task_time = document.getElementById('task_time').value * 60;
     if (task_name === '' || task_type === '' || difficulty_level === '' || task_time === '') {
         alert('未入力の項目があります。')
         return;
