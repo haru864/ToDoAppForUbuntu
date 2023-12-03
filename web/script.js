@@ -101,7 +101,7 @@ function updateTimer(task_id) {
         return;
     }
     timer.remaining -= 1;
-    eel.incrementTotalElapsedTime(task_id);
+    eel.updateTaskTime(task_id);
     document.getElementById(task_id).innerText = formatTime(timer.remaining);
 }
 

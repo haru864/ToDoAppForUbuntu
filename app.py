@@ -108,15 +108,18 @@ def deleteRegisteredTask(task_id: int) -> None:
 
 
 @eel.expose
-def incrementTotalElapsedTime(task_id: int) -> None:
-    query: str = "SELECT total_elapsed_time_seconds FROM task_info WHERE id = ?"
-    update: str = "UPDATE task_info SET total_elapsed_time_seconds = ? WHERE id = ?"
+def updateTaskTime(task_id: int) -> None:
+    query: str = "SELECT remaining_time_seconds, total_elapsed_time_seconds FROM task_info WHERE id = ?"
+    update: str = "UPDATE task_info SET remaining_time_seconds = ?, total_elapsed_time_seconds = ? WHERE id = ?"
     with sqlite3.connect(DB_PATH) as conn:
         cursor: sqlite3.Cursor = conn.cursor()
         cursor.execute(query, (task_id,))
-        current_total_elapsed_time: int = cursor.fetchone()[0]
+        current_remaining_time, current_total_elapsed_time = cursor.fetchone()
+        updated_remaining_time: int = current_remaining_time - 1
         updated_total_elapsed_time: int = current_total_elapsed_time + 1
-        cursor.execute(update, (updated_total_elapsed_time, task_id))
+        cursor.execute(
+            update, (updated_remaining_time, updated_total_elapsed_time, task_id)
+        )
     return None
 
 
