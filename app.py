@@ -107,6 +107,19 @@ def deleteRegisteredTask(task_id: int) -> None:
     return None
 
 
+@eel.expose
+def incrementTotalElapsedTime(task_id: int) -> None:
+    query: str = "SELECT total_elapsed_time_seconds FROM task_info WHERE id = ?"
+    update: str = "UPDATE task_info SET total_elapsed_time_seconds = ? WHERE id = ?"
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute(query, (task_id,))
+        current_total_elapsed_time: int = cursor.fetchone()[0]
+        updated_total_elapsed_time: int = current_total_elapsed_time + 1
+        cursor.execute(update, (updated_total_elapsed_time, task_id))
+    return None
+
+
 def dict_factory(cursor, row):
     fields = [column[0] for column in cursor.description]
     return {key: value for key, value in zip(fields, row)}

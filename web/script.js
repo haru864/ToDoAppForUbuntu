@@ -59,10 +59,10 @@ async function listRegisteredTask() {
     }
 }
 
-function formatTime(minutes) {
-    let h = Math.floor(minutes / 60);
-    let m = Math.floor(minutes % 60);
-    let s = Math.floor((minutes - Math.floor(minutes)) * 60);
+function formatTime(seconds) {
+    let h = Math.floor(seconds / 3600);
+    let m = Math.floor(seconds / 60);
+    let s = Math.floor(seconds % 60);
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
@@ -79,11 +79,11 @@ function completeTask(btn, task_id) {
 function toggleTimer(btn, task_id, time) {
     if (timers[task_id]) {
         clearInterval(timers[task_id].interval);
-        // delete timers[task_id];
+        delete timers[task_id];
         btn.innerText = 'スタート';
     } else {
         timers[task_id] = {
-            remaining: time * 60, interval: setInterval(function () {
+            remaining: time, interval: setInterval(function () {
                 updateTimer(task_id);
             }, 1000)
         };
@@ -93,14 +93,16 @@ function toggleTimer(btn, task_id, time) {
 
 function updateTimer(task_id) {
     var timer = timers[task_id];
-    if (--timer.remaining <= 0) {
+    if (timer.remaining <= 0) {
         clearInterval(timer.interval);
         eel.startSound();
         alert(task_id + 'の終了時間です！');
         eel.stopSound();
-    } else {
-        document.getElementById(task_id).innerText = formatTime(timer.remaining / 60);
+        return;
     }
+    timer.remaining -= 1;
+    eel.incrementTotalElapsedTime(task_id);
+    document.getElementById(task_id).innerText = formatTime(timer.remaining);
 }
 
 function deleteTask(btn, task_id) {
