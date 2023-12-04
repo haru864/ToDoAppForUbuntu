@@ -54,16 +54,22 @@ async function listRegisteredTask() {
             continue;
         }
         let elem = document.createElement('li');
-        elem.innerHTML = `${task_info.task_name}(${task_info.task_type},${task_info.difficulty_level}) - 残り時間: <span id='${task_info.id}'>${formatTime(task_info.remaining_time_seconds)}</span> <button onclick="toggleTimer(this, '${task_info.id}', ${task_info.remaining_time_seconds})">スタート</button> <button onclick="completeTask(this, '${task_info.id}')">完了</button> <button onclick="deleteTask(this, '${task_info.id}')">削除</button> `;
+        elem.innerHTML = `${task_info.task_name}(${task_info.task_type},${task_info.difficulty_level}) - 残り時間: <span id='task-id_${task_info.id}'>${formatSecondsToHMS(task_info.remaining_time_seconds)}</span> <button onclick="toggleTimer(this, '${task_info.id}')">スタート</button> <button onclick="completeTask(this, '${task_info.id}')">完了</button> <button onclick="deleteTask(this, '${task_info.id}')">削除</button> `;
         list.appendChild(elem);
     }
 }
 
-function formatTime(seconds) {
+function formatSecondsToHMS(seconds) {
     let h = Math.floor(seconds / 3600);
     let m = Math.floor(seconds / 60);
     let s = Math.floor(seconds % 60);
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function formatHMSToSeconds(hms) {
+    let hms_array = hms.split(':');
+    let seconds = (+hms_array[0]) * 60 * 60 + (+hms_array[1]) * 60 + (+hms_array[2]);
+    return seconds;
 }
 
 function completeTask(btn, task_id) {
@@ -76,16 +82,17 @@ function completeTask(btn, task_id) {
     li.parentNode.removeChild(li);
 }
 
-function toggleTimer(btn, task_id, time) {
+async function toggleTimer(btn, task_id) {
+    console.log(timers);
     if (timers[task_id]) {
         clearInterval(timers[task_id].interval);
         delete timers[task_id];
         btn.innerText = 'スタート';
     } else {
+        let time = await eel.getRemainingTime(task_id)();
+        console.log(time);
         timers[task_id] = {
-            remaining: time, interval: setInterval(function () {
-                updateTimer(task_id);
-            }, 1000)
+            remaining: time, interval: setInterval(function () { updateTimer(task_id); }, 1000)
         };
         btn.innerText = '停止';
     }
@@ -102,7 +109,7 @@ function updateTimer(task_id) {
     }
     timer.remaining -= 1;
     eel.updateTaskTime(task_id);
-    document.getElementById(task_id).innerText = formatTime(timer.remaining);
+    document.getElementById(`task-id_${task_id}`).innerText = formatSecondsToHMS(timer.remaining);
 }
 
 function deleteTask(btn, task_id) {

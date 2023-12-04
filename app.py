@@ -123,6 +123,16 @@ def updateTaskTime(task_id: int) -> None:
     return None
 
 
+@eel.expose
+def getRemainingTime(task_id: int) -> int:
+    query: str = "SELECT remaining_time_seconds FROM task_info WHERE id = ?"
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute(query, (task_id,))
+        current_remaining_time: int = cursor.fetchone()[0]
+    return current_remaining_time
+
+
 def dict_factory(cursor, row):
     fields = [column[0] for column in cursor.description]
     return {key: value for key, value in zip(fields, row)}
