@@ -138,8 +138,15 @@ def dict_factory(cursor, row):
     return {key: value for key, value in zip(fields, row)}
 
 
+root = tkinter.Tk()
+monitor_height: int = root.winfo_screenheight()
+monitor_width: int = root.winfo_screenwidth()
+left: int = (monitor_width - setting_data["width"]) // 2
+top: int = (monitor_height - setting_data["height"]) // 2
+
 eel.start(
     "index.html",
     size=(setting_data["width"], setting_data["height"]),
     port=setting_data["port"],
+    position=(left, top),
 )
