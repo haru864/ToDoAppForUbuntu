@@ -37,8 +37,9 @@ document.getElementById('add_task').addEventListener('click', function () {
 
 async function listRegisteredTask() {
     let list = document.getElementById('task_list');
-    let task_list = await eel.getRegisteredTask()();
-    let records = JSON.parse(task_list);
+    list.innerHTML = '';
+    let registered_task_list = await eel.getRegisteredTask()();
+    let records = JSON.parse(registered_task_list);
     for (let record of records) {
         let task_info = new TaskInfo(
             record["id"],
@@ -50,11 +51,8 @@ async function listRegisteredTask() {
             record["remaining_time_seconds"],
             record["total_elapsed_time_seconds"]
         );
-        if (document.getElementById(`${task_info.id}`)) {
-            continue;
-        }
         let elem = document.createElement('li');
-        elem.innerHTML = `${task_info.task_name}(${task_info.task_type},${task_info.difficulty_level}) - 残り時間: <span id='task-id_${task_info.id}'>${formatSecondsToHMS(task_info.remaining_time_seconds)}</span> <button onclick="toggleTimer(this, '${task_info.id}')">スタート</button> <button onclick="completeTask(this, '${task_info.id}')">完了</button> <button onclick="deleteTask(this, '${task_info.id}')">削除</button> `;
+        elem.innerHTML = `${task_info.task_name}(${task_info.task_type},${task_info.difficulty_level}) - 残り時間: <span id='task-id_${task_info.id}'>${formatSecondsToHMS(task_info.remaining_time_seconds)}</span> <button onclick="changeTaskTime('${task_info.id}')">時間変更</button> <button onclick="toggleTimer(this, '${task_info.id}')">スタート</button> <button onclick="completeTask(this, '${task_info.id}')">完了</button> <button onclick="deleteTask(this, '${task_info.id}')">削除</button> `;
         list.appendChild(elem);
     }
 }
@@ -70,6 +68,15 @@ function formatHMSToSeconds(hms) {
     let hms_array = hms.split(':');
     let seconds = (+hms_array[0]) * 60 * 60 + (+hms_array[1]) * 60 + (+hms_array[2]);
     return seconds;
+}
+
+async function changeTaskTime(task_id) {
+    let new_task_time = await eel.receiveNewTaskTime()();
+    if (new_task_time === null) {
+        return;
+    }
+    eel.changeTaskTime(task_id, new_task_time);
+    listRegisteredTask();
 }
 
 function completeTask(btn, task_id) {
@@ -108,7 +115,7 @@ function updateTimer(task_id) {
         return;
     }
     timer.remaining -= 1;
-    eel.updateTaskTime(task_id);
+    eel.advanceTaskTime(task_id);
     document.getElementById(`task-id_${task_id}`).innerText = formatSecondsToHMS(timer.remaining);
 }
 

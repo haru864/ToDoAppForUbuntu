@@ -5,6 +5,7 @@ import json
 import pygame
 import tkinter
 from tkinter import filedialog
+from tkinter import simpledialog
 from tkinter import messagebox
 import sqlite3
 
@@ -79,7 +80,7 @@ def registerTask(
 
 @eel.expose
 def getRegisteredTask() -> str:
-    sql: str = "SELECT * FROM task_info WHERE is_completed = 0"
+    sql: str = "SELECT * FROM task_info WHERE is_completed = 0 ORDER BY task_name"
     query_result: list[Any] = None
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = dict_factory
@@ -108,7 +109,7 @@ def deleteRegisteredTask(task_id: int) -> None:
 
 
 @eel.expose
-def updateTaskTime(task_id: int) -> None:
+def advanceTaskTime(task_id: int) -> None:
     query: str = "SELECT remaining_time_seconds, total_elapsed_time_seconds FROM task_info WHERE id = ?"
     update: str = "UPDATE task_info SET remaining_time_seconds = ?, total_elapsed_time_seconds = ? WHERE id = ?"
     with sqlite3.connect(DB_PATH) as conn:
@@ -120,6 +121,15 @@ def updateTaskTime(task_id: int) -> None:
         cursor.execute(
             update, (updated_remaining_time, updated_total_elapsed_time, task_id)
         )
+    return None
+
+
+@eel.expose
+def changeTaskTime(task_id: int, new_task_time: int) -> None:
+    update: str = "UPDATE task_info SET remaining_time_seconds = ? WHERE id = ?"
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute(update, (new_task_time, task_id))
     return None
 
 
@@ -136,6 +146,25 @@ def getRemainingTime(task_id: int) -> int:
 def dict_factory(cursor, row):
     fields = [column[0] for column in cursor.description]
     return {key: value for key, value in zip(fields, row)}
+
+
+@eel.expose
+def receiveNewTaskTime() -> int | None:
+    top = tkinter.Toplevel()
+    top.withdraw()
+    while new_task_time_str := simpledialog.askstring(
+        "作業時間変更", "新しい作業時間を入力してください", parent=top
+    ):
+        try:
+            if new_task_time_str is None:
+                top.destroy()
+                return None
+            new_task_time: int = int(new_task_time_str)
+            return new_task_time
+        except Exception:
+            messagebox.showerror("エラー", "作業時間は整数(秒単位)で指定して下さい。")
+    top.destroy()
+    return None
 
 
 root = tkinter.Tk()
