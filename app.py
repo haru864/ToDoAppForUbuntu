@@ -8,6 +8,8 @@ from tkinter import filedialog
 from tkinter import simpledialog
 from tkinter import messagebox
 import sqlite3
+import pandas
+from sklearn import linear_model
 
 
 DB_PATH: str = "db/todo.db"
@@ -165,6 +167,40 @@ def receiveNewTaskTime() -> int | None:
             messagebox.showerror("エラー", "作業時間は整数(秒単位)で指定して下さい。")
     top.destroy()
     return None
+
+
+@eel.expose
+def predictTaskTime(
+    task_type: str, difficulty_level: int, estimated_time_seconds: int
+) -> int | None:
+    query: str = "SELECT * FROM task_info WHERE is_completed = 1"
+    with sqlite3.connect(DB_PATH) as conn:
+        df = pandas.read_sql_query(query, conn)
+    if df.empty:
+        return None
+
+    task_type_set: set[str] = set(df["task_type"].tolist())
+    task_type_mapping: dict[str, int] = {}
+    for num, curr_task_type in enumerate(task_type_set):
+        task_type_mapping[curr_task_type] = num
+
+    filtered_df = df[df["task_type"] == task_type]
+    if filtered_df.empty:
+        return None
+    df_preprocessed: pandas.DataFrame = filtered_df.copy(deep=True)
+    df_preprocessed["task_type"] = df_preprocessed["task_type"].map(task_type_mapping)
+
+    reg = linear_model.LinearRegression()
+    x = df_preprocessed[["task_type", "difficulty_level", "estimated_time_seconds"]]
+    y = df_preprocessed["total_elapsed_time_seconds"]
+    reg.fit(x, y)
+
+    input_df = pandas.DataFrame(
+        data=[[task_type_mapping[task_type], difficulty_level, estimated_time_seconds]],
+        columns=["task_type", "difficulty_level", "estimated_time_seconds"],
+    )
+    y_pred = reg.predict(input_df)
+    return y_pred[0]
 
 
 root = tkinter.Tk()

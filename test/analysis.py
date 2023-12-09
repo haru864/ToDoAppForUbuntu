@@ -19,19 +19,20 @@ for num, task_type in enumerate(task_type_set):
     task_type_mapping[task_type] = num
 # print(task_type_mapping)
 
-df_preprocessed: pandas.DataFrame = df.copy(deep=True)
-df_preprocessed["task_type"] = df_preprocessed["task_type"].map(task_type_mapping)
-# print(df_preprocessed.head(10))
+for current_task_type in ["A", "B", "C"]:
+    filtered_df = df[df["task_type"] == current_task_type]
+    df_preprocessed: pandas.DataFrame = filtered_df.copy(deep=True)
+    df_preprocessed["task_type"] = df_preprocessed["task_type"].map(task_type_mapping)
 
-reg = linear_model.LinearRegression()
-x = df_preprocessed[["task_type", "difficulty_level", "estimated_time_seconds"]]
-y = df_preprocessed["total_elapsed_time_seconds"]
-# x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=0)
-reg.fit(x, y)
-# print(reg.coef_)
+    reg = linear_model.LinearRegression()
+    x = df_preprocessed[["task_type", "difficulty_level", "estimated_time_seconds"]]
+    y = df_preprocessed["total_elapsed_time_seconds"]
+    # x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=0)
+    reg.fit(x, y)
+    # print(reg.coef_)
 
-y_pred = reg.predict(x)
-# print(y_pred)
+    y_pred = reg.predict(x)
+    print(y_pred)
 
-mse = mean_squared_error(y, y_pred)
-print(f"Mean Squared Error: {mse}")
+    mse = mean_squared_error(y, y_pred)
+    print(f"Mean Squared Error: {mse}")

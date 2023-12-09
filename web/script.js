@@ -18,6 +18,24 @@ document.getElementById('select_sound').addEventListener('click', function () {
     eel.selectSound();
 });
 
+document.getElementById('predict_time').addEventListener('click', async function () {
+    let task_type = document.getElementById('task_type').value;
+    let difficulty_level = document.getElementById('difficulty_level').value;
+    let estimated_time_seconds = document.getElementById('task_time').value;
+    if (task_type === null || task_type === ''
+        || difficulty_level === null || difficulty_level === ''
+        || estimated_time_seconds === null || estimated_time_seconds === '') {
+        alert('タスク種別、難易度、時間をすべて入力してください。');
+        return;
+    }
+    let predicted_task_time = await eel.predictTaskTime(task_type, difficulty_level, estimated_time_seconds)();
+    if (predicted_task_time === null) {
+        alert('同じタスク種別のデータがないため予測できません。');
+        return;
+    }
+    alert(`想定されるタスク時間：${(predicted_task_time).toFixed()}秒`);
+});
+
 document.getElementById('add_task').addEventListener('click', function () {
     var task_name = document.getElementById('task_name').value;
     var task_type = document.getElementById('task_type').value;
