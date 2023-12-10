@@ -18,6 +18,10 @@ document.getElementById('select_sound').addEventListener('click', function () {
     eel.selectSound();
 });
 
+document.getElementById('show_task_type').addEventListener('click', function () {
+    eel.showRegisteredTaskType();    
+});
+
 document.getElementById('predict_time').addEventListener('click', async function () {
     let task_type = document.getElementById('task_type').value;
     let difficulty_level = document.getElementById('difficulty_level').value;

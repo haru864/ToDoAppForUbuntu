@@ -81,7 +81,43 @@ def registerTask(
 
 
 @eel.expose
-def getRegisteredTask() -> str:
+def showRegisteredTaskType() -> None:
+    query: str = "SELECT DISTINCT task_type FROM task_info ORDER BY task_type"
+    query_result: list[Any] = None
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = dict_factory
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute(query)
+        query_result = cursor.fetchall()
+    task_type_list: list[str] = []
+    for elem in query_result:
+        task_type_list.append(elem["task_type"])
+    messagebox.showinfo(title="登録済みタスク種別", message="\n".join(task_type_list))
+    return None
+
+
+@eel.expose
+def clearTaskInfo() -> None:
+    sql: str = "DELETE FROM task_info"
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute(sql)
+        conn.commit()
+    return None
+
+
+@eel.expose
+def deleteFromTaskInfo(task_type: str) -> None:
+    sql: str = "DELETE FROM task_info WHERE task_info = ?"
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute(sql, (task_type,))
+        conn.commit()
+    return None
+
+
+@eel.expose
+def getRegisteredTask() -> str | None:
     sql: str = "SELECT * FROM task_info WHERE is_completed = 0 ORDER BY task_name"
     query_result: list[Any] = None
     with sqlite3.connect(DB_PATH) as conn:
@@ -204,6 +240,7 @@ def predictTaskTime(
 
 
 root = tkinter.Tk()
+root.withdraw()
 monitor_height: int = root.winfo_screenheight()
 monitor_width: int = root.winfo_screenwidth()
 left: int = (monitor_width - setting_data["width"]) // 2
