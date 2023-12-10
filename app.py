@@ -97,8 +97,8 @@ def showRegisteredTaskType() -> None:
 
 
 @eel.expose
-def clearTaskInfo() -> None:
-    sql: str = "DELETE FROM task_info"
+def clearCompletedTaskInfo() -> None:
+    sql: str = "DELETE FROM task_info WHERE is_completed = 1"
     with sqlite3.connect(DB_PATH) as conn:
         cursor: sqlite3.Cursor = conn.cursor()
         cursor.execute(sql)
@@ -107,8 +107,12 @@ def clearTaskInfo() -> None:
 
 
 @eel.expose
-def deleteFromTaskInfo(task_type: str) -> None:
-    sql: str = "DELETE FROM task_info WHERE task_info = ?"
+def deleteFromTaskInfo() -> None:
+    task_type = simpledialog.askstring(
+        "入力ボックス",
+        "タスク種別を入力してください。",
+    )
+    sql: str = "DELETE FROM task_info WHERE task_type = ?"
     with sqlite3.connect(DB_PATH) as conn:
         cursor: sqlite3.Cursor = conn.cursor()
         cursor.execute(sql, (task_type,))

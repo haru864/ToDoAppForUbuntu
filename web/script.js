@@ -19,7 +19,15 @@ document.getElementById('select_sound').addEventListener('click', function () {
 });
 
 document.getElementById('show_task_type').addEventListener('click', function () {
-    eel.showRegisteredTaskType();    
+    eel.showRegisteredTaskType();
+});
+
+document.getElementById('delete_completed_task').addEventListener('click', function () {
+    eel.clearCompletedTaskInfo();
+});
+
+document.getElementById('delete_specified_task').addEventListener('click', function () {
+    eel.deleteFromTaskInfo();
 });
 
 document.getElementById('predict_time').addEventListener('click', async function () {
